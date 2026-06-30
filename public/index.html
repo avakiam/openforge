@@ -98,11 +98,41 @@
         </label>
         <label>
           <span data-i18n="workingDirectory">Working directory</span>
-          <input id="cwd-input" name="cwd" />
+          <span class="path-picker-row">
+            <input id="cwd-input" name="cwd" />
+            <button id="browse-cwd-button" type="button" class="secondary-action" data-i18n="browse">Browse</button>
+          </span>
         </label>
         <menu>
           <button value="cancel" type="button" id="cancel-new-terminal" data-i18n="cancel">Cancel</button>
           <button value="default" type="submit" data-i18n="create">Create</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="filesystem-dialog" class="wide-dialog">
+      <form method="dialog" class="dialog-form">
+        <h2 data-i18n="chooseFolder">Choose Folder</h2>
+        <div class="directory-toolbar">
+          <button id="fs-up-button" type="button" class="secondary-action" data-i18n="parentDirectory">Up</button>
+          <code id="fs-current-path"></code>
+        </div>
+        <div id="fs-roots" class="root-list"></div>
+        <div id="fs-list" class="directory-list" role="list"></div>
+        <menu>
+          <button value="cancel" type="button" id="cancel-filesystem" data-i18n="cancel">Cancel</button>
+          <button value="default" type="button" id="select-cwd-button" data-i18n="choose">Choose</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="confirm-close-dialog">
+      <form method="dialog" class="dialog-form">
+        <h2 id="confirm-close-title" data-i18n="closeTerminalTitle">Close terminal?</h2>
+        <p id="confirm-close-body" class="dialog-copy"></p>
+        <menu>
+          <button value="cancel" type="button" id="cancel-close-session" data-i18n="cancel">Cancel</button>
+          <button value="default" type="button" id="confirm-close-session" class="danger-action" data-i18n="close">Close</button>
         </menu>
       </form>
     </dialog>

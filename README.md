@@ -15,6 +15,8 @@ npm start
 
 Then open [http://localhost:8734](http://localhost:8734), create the first username/password, and press **New** to start an OpenCode terminal.
 
+The New Terminal dialog lets you type a working directory or browse server folders with the built-in folder picker.
+
 For app-only development without installing OpenCode:
 
 ```bash
@@ -170,6 +172,18 @@ sudo systemctl status openforge
 ```
 
 Terminal sessions survive browser disconnects and page refreshes. They live as long as the OpenForge server process is alive; after a server restart or reboot, create new terminal sessions.
+
+## Session Persistence
+
+OpenForge keeps live terminal sessions in memory as server-owned PTY processes.
+
+- Browser refresh or disconnect: terminal sessions keep running.
+- OpenForge process restart: live terminal sessions stop and must be recreated.
+- Host reboot: live terminal sessions stop and must be recreated.
+- User accounts and login/session data remain on disk in `OPENFORGE_DATA_DIR`.
+- With `bash scripts/install-ubuntu.sh --with-service`, systemd enables OpenForge to start again automatically after reboot.
+
+If you do not install the systemd service, start OpenForge manually after reboot with `npm start`.
 
 ## Reverse Proxy
 

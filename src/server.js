@@ -6,6 +6,7 @@ const session = require("express-session");
 const FileStore = require("session-file-store")(session);
 const { Server } = require("socket.io");
 const { attachAuthRoutes, publicUser, requireAuth } = require("./auth");
+const { FilesystemBrowser } = require("./filesystem");
 const { OpencodeInstaller } = require("./opencode");
 const { Store } = require("./store");
 const { TerminalManager } = require("./terminal-manager");
@@ -33,6 +34,10 @@ async function main() {
     transports: ["websocket", "polling"]
   });
   const terminals = new TerminalManager();
+  const filesystem = new FilesystemBrowser({
+    defaultCwd: terminals.defaultCwd,
+    workspaceRoot: terminals.workspaceRoot
+  });
   const installer = new OpencodeInstaller();
 
   if (process.env.OPENFORGE_TRUST_PROXY === "1") {
@@ -84,6 +89,30 @@ async function main() {
 
   app.get("/api/sessions", requireAuth, (req, res) => {
     res.json({ sessions: terminals.listSessions() });
+  });
+
+  app.get("/api/fs/directories", requireAuth, async (req, res, next) => {
+    try {
+      res.json(await filesystem.list(req.query.path));
+    } catch (error) {
+      if (error.code === "ENOENT") {
+        res.status(404).json({ code: "path_not_found", error: "Path not found." });
+        return;
+      }
+      if (error.code === "EACCES" || error.code === "EPERM") {
+        res.status(403).json({ code: "path_access_denied", error: "Path access denied." });
+        return;
+      }
+      if (error.code === "path_outside_workspace") {
+        res.status(400).json({ code: error.code, error: error.message });
+        return;
+      }
+      if (error.code === "path_not_directory") {
+        res.status(400).json({ code: error.code, error: error.message });
+        return;
+      }
+      next(error);
+    }
   });
 
   app.post("/api/opencode/install", requireAuth, async (req, res, next) => {

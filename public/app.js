@@ -15,10 +15,19 @@
       fit: "Fit",
       fitTerminal: "Fit terminal",
       close: "Close",
+      browse: "Browse",
       noTerminals: "No terminals",
       newTerminalHeading: "New Terminal",
       name: "Name",
       workingDirectory: "Working directory",
+      chooseFolder: "Choose Folder",
+      choose: "Choose",
+      parentDirectory: "Up",
+      loading: "Loading...",
+      noFolders: "No folders",
+      folderIcon: "Folder",
+      closeTerminalTitle: "Close terminal?",
+      closeTerminalBody: "This will stop the running OpenCode terminal \"{title}\" and remove it from the list.",
       cancel: "Cancel",
       create: "Create",
       checking: "Checking",
@@ -40,7 +49,11 @@
         "Username must be 3-32 characters using letters, numbers, dots, underscores, or dashes.",
       error_invalid_password: "Password must be at least 8 characters.",
       error_invalid_credentials: "Invalid username or password.",
-      error_server_error: "Server error."
+      error_server_error: "Server error.",
+      error_path_not_found: "Path not found.",
+      error_path_access_denied: "Path access denied.",
+      error_path_outside_workspace: "Path must stay inside the configured workspace.",
+      error_path_not_directory: "Path is not a directory."
     },
     es: {
       firstAdmin: "Primer administrador",
@@ -57,10 +70,19 @@
       fit: "Ajustar",
       fitTerminal: "Ajustar terminal",
       close: "Cerrar",
+      browse: "Examinar",
       noTerminals: "No hay terminales",
       newTerminalHeading: "Nueva terminal",
       name: "Nombre",
       workingDirectory: "Directorio de trabajo",
+      chooseFolder: "Elegir carpeta",
+      choose: "Elegir",
+      parentDirectory: "Subir",
+      loading: "Cargando...",
+      noFolders: "No hay carpetas",
+      folderIcon: "Carpeta",
+      closeTerminalTitle: "¿Cerrar terminal?",
+      closeTerminalBody: "Esto detendrá la terminal de OpenCode \"{title}\" y la quitará de la lista.",
       cancel: "Cancelar",
       create: "Crear",
       checking: "Comprobando",
@@ -82,7 +104,11 @@
         "El usuario debe tener 3-32 caracteres y usar letras, números, puntos, guiones bajos o guiones.",
       error_invalid_password: "La contraseña debe tener al menos 8 caracteres.",
       error_invalid_credentials: "Usuario o contraseña incorrectos.",
-      error_server_error: "Error del servidor."
+      error_server_error: "Error del servidor.",
+      error_path_not_found: "Ruta no encontrada.",
+      error_path_access_denied: "Acceso denegado a la ruta.",
+      error_path_outside_workspace: "La ruta debe estar dentro del espacio de trabajo configurado.",
+      error_path_not_directory: "La ruta no es un directorio."
     },
     ca: {
       firstAdmin: "Primer administrador",
@@ -99,10 +125,19 @@
       fit: "Ajusta",
       fitTerminal: "Ajusta la terminal",
       close: "Tanca",
+      browse: "Navega",
       noTerminals: "No hi ha terminals",
       newTerminalHeading: "Terminal nova",
       name: "Nom",
       workingDirectory: "Directori de treball",
+      chooseFolder: "Tria carpeta",
+      choose: "Tria",
+      parentDirectory: "Puja",
+      loading: "Carregant...",
+      noFolders: "No hi ha carpetes",
+      folderIcon: "Carpeta",
+      closeTerminalTitle: "Vols tancar la terminal?",
+      closeTerminalBody: "Això aturarà la terminal d'OpenCode \"{title}\" i la traurà de la llista.",
       cancel: "Cancel·la",
       create: "Crea",
       checking: "Comprovant",
@@ -124,7 +159,11 @@
         "L'usuari ha de tenir 3-32 caràcters i usar lletres, números, punts, guions baixos o guions.",
       error_invalid_password: "La contrasenya ha de tenir com a mínim 8 caràcters.",
       error_invalid_credentials: "Usuari o contrasenya incorrectes.",
-      error_server_error: "Error del servidor."
+      error_server_error: "Error del servidor.",
+      error_path_not_found: "No s'ha trobat la ruta.",
+      error_path_access_denied: "Accés denegat a la ruta.",
+      error_path_outside_workspace: "La ruta ha d'estar dins de l'espai de treball configurat.",
+      error_path_not_directory: "La ruta no és un directori."
     }
   };
 
@@ -145,7 +184,9 @@
     activeId: null,
     terminal: null,
     fitAddon: null,
-    resizeObserver: null
+    resizeObserver: null,
+    pendingCloseId: null,
+    directoryPath: null
   };
 
   function t(key, replacements = {}) {
@@ -213,7 +254,19 @@
     dialog: document.getElementById("new-terminal-dialog"),
     newForm: document.getElementById("new-terminal-form"),
     cancelNew: document.getElementById("cancel-new-terminal"),
-    cwdInput: document.getElementById("cwd-input")
+    cwdInput: document.getElementById("cwd-input"),
+    browseCwdButton: document.getElementById("browse-cwd-button"),
+    filesystemDialog: document.getElementById("filesystem-dialog"),
+    fsUpButton: document.getElementById("fs-up-button"),
+    fsCurrentPath: document.getElementById("fs-current-path"),
+    fsRoots: document.getElementById("fs-roots"),
+    fsList: document.getElementById("fs-list"),
+    cancelFilesystem: document.getElementById("cancel-filesystem"),
+    selectCwdButton: document.getElementById("select-cwd-button"),
+    confirmCloseDialog: document.getElementById("confirm-close-dialog"),
+    confirmCloseBody: document.getElementById("confirm-close-body"),
+    cancelCloseSession: document.getElementById("cancel-close-session"),
+    confirmCloseSession: document.getElementById("confirm-close-session")
   };
 
   async function api(path, options = {}) {
@@ -329,7 +382,7 @@
       button.addEventListener("click", () => selectSession(session.id));
       closeButton.addEventListener("click", (event) => {
         event.stopPropagation();
-        closeSession(session.id);
+        requestCloseSession(session.id);
       });
 
       row.append(button, closeButton);
@@ -436,11 +489,94 @@
     });
   }
 
-  function closeSession(id) {
+  function requestCloseSession(id) {
+    const session = state.sessions.find((item) => item.id === id);
+    if (!session) return;
+
+    state.pendingCloseId = id;
+    els.confirmCloseBody.textContent = t("closeTerminalBody", { title: session.title });
+    els.confirmCloseDialog.showModal();
+  }
+
+  function closeSessionNow(id) {
     if (!id) return;
     state.socket.emit("session:kill", { id }, (response) => {
       if (!response?.ok) alert(translateErrorMessage(response?.error) || t("unableCloseTerminal"));
     });
+  }
+
+  function setDirectoryLoading() {
+    els.fsList.replaceChildren();
+    const empty = document.createElement("div");
+    empty.className = "directory-empty";
+    empty.textContent = t("loading");
+    els.fsList.append(empty);
+  }
+
+  async function loadDirectory(targetPath) {
+    setDirectoryLoading();
+    const query = targetPath ? `?path=${encodeURIComponent(targetPath)}` : "";
+    const data = await api(`/api/fs/directories${query}`);
+    state.directoryPath = data.current;
+    renderDirectoryBrowser(data);
+  }
+
+  function renderDirectoryBrowser(data) {
+    els.fsCurrentPath.textContent = data.current;
+    els.fsUpButton.disabled = !data.parent;
+    els.fsUpButton.dataset.parent = data.parent || "";
+
+    els.fsRoots.replaceChildren();
+    for (const root of data.roots || []) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.textContent = root.name;
+      button.addEventListener("click", () => {
+        loadDirectory(root.path).catch((error) => alert(error.message));
+      });
+      els.fsRoots.append(button);
+    }
+
+    els.fsList.replaceChildren();
+    if (!data.entries.length) {
+      const empty = document.createElement("div");
+      empty.className = "directory-empty";
+      empty.textContent = t("noFolders");
+      els.fsList.append(empty);
+      return;
+    }
+
+    for (const entry of data.entries) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "directory-entry";
+      button.setAttribute("role", "listitem");
+      button.title = entry.path;
+
+      const icon = document.createElement("span");
+      icon.setAttribute("aria-label", t("folderIcon"));
+      icon.textContent = ">";
+
+      const label = document.createElement("span");
+      label.textContent = entry.name;
+
+      button.append(icon, label);
+      button.addEventListener("click", () => {
+        loadDirectory(entry.path).catch((error) => alert(error.message));
+      });
+      els.fsList.append(button);
+    }
+  }
+
+  async function openDirectoryPicker() {
+    setDirectoryLoading();
+    els.filesystemDialog.showModal();
+    try {
+      await loadDirectory(els.cwdInput.value || state.status?.defaults?.cwd || "");
+    } catch (error) {
+      alert(error.message);
+      els.filesystemDialog.close();
+    }
   }
 
   async function boot() {
@@ -519,6 +655,30 @@
     els.dialog.close();
   });
 
+  els.browseCwdButton.addEventListener("click", () => {
+    openDirectoryPicker();
+  });
+
+  els.cancelFilesystem.addEventListener("click", () => {
+    els.filesystemDialog.close();
+  });
+
+  els.fsUpButton.addEventListener("click", () => {
+    const current = state.directoryPath;
+    if (!current) return;
+    const parent = els.fsUpButton.disabled ? null : els.fsUpButton.dataset.parent;
+    if (parent) {
+      loadDirectory(parent).catch((error) => alert(error.message));
+    }
+  });
+
+  els.selectCwdButton.addEventListener("click", () => {
+    if (state.directoryPath) {
+      els.cwdInput.value = state.directoryPath;
+    }
+    els.filesystemDialog.close();
+  });
+
   els.newForm.addEventListener("submit", async (event) => {
     event.preventDefault();
     const form = new FormData(els.newForm);
@@ -552,7 +712,19 @@
   els.killButton.addEventListener("click", () => {
     const session = currentSession();
     if (!session) return;
-    closeSession(session.id);
+    requestCloseSession(session.id);
+  });
+
+  els.cancelCloseSession.addEventListener("click", () => {
+    state.pendingCloseId = null;
+    els.confirmCloseDialog.close();
+  });
+
+  els.confirmCloseSession.addEventListener("click", () => {
+    const id = state.pendingCloseId;
+    state.pendingCloseId = null;
+    els.confirmCloseDialog.close();
+    closeSessionNow(id);
   });
 
   window.addEventListener("resize", fitTerminal);
