@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>OpenForge</title>
+    <link rel="stylesheet" href="/vendor/xterm/css/xterm.css" />
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main id="auth-view" class="auth-shell hidden">
+      <section class="auth-panel">
+        <div class="auth-brand">
+          <span class="mark">OF</span>
+          <h1>OpenForge</h1>
+        </div>
+
+        <form id="setup-form" class="auth-form hidden">
+          <h2>First Admin</h2>
+          <label>
+            Username
+            <input name="username" autocomplete="username" required minlength="3" maxlength="32" />
+          </label>
+          <label>
+            Password
+            <input name="password" type="password" autocomplete="new-password" required minlength="8" />
+          </label>
+          <button type="submit">Create Account</button>
+        </form>
+
+        <form id="login-form" class="auth-form hidden">
+          <h2>Sign In</h2>
+          <label>
+            Username
+            <input name="username" autocomplete="username" required />
+          </label>
+          <label>
+            Password
+            <input name="password" type="password" autocomplete="current-password" required />
+          </label>
+          <button type="submit">Sign In</button>
+        </form>
+
+        <p id="auth-message" class="message" role="status"></p>
+      </section>
+    </main>
+
+    <main id="app-view" class="app-shell hidden">
+      <aside class="sidebar">
+        <div class="sidebar-top">
+          <div class="brand-row">
+            <span class="mark">OF</span>
+            <div>
+              <strong>OpenForge</strong>
+              <span id="opencode-status" class="status-pill">Checking</span>
+            </div>
+          </div>
+          <button id="new-terminal-button" class="primary-action" type="button" title="New terminal">
+            <span aria-hidden="true">+</span>
+            <span>New</span>
+          </button>
+        </div>
+
+        <nav id="session-list" class="session-list" aria-label="Terminals"></nav>
+
+        <div class="sidebar-bottom">
+          <button id="install-button" class="secondary-action hidden" type="button">Install OpenCode</button>
+          <span id="signed-in-user" class="muted"></span>
+          <button id="logout-button" class="ghost-action" type="button">Sign Out</button>
+        </div>
+      </aside>
+
+      <section class="workspace">
+        <header class="workspace-header">
+          <div>
+            <h2 id="terminal-title">No Terminal</h2>
+            <p id="terminal-subtitle"></p>
+          </div>
+          <div class="header-actions">
+            <button id="fit-button" class="icon-button" type="button" title="Fit terminal" aria-label="Fit terminal">Fit</button>
+            <button id="kill-button" class="danger-action" type="button">Stop</button>
+          </div>
+        </header>
+
+        <div id="terminal-wrap" class="terminal-wrap">
+          <div id="empty-state" class="empty-state">No terminals</div>
+          <div id="terminal" class="terminal"></div>
+        </div>
+      </section>
+    </main>
+
+    <dialog id="new-terminal-dialog">
+      <form id="new-terminal-form" method="dialog" class="dialog-form">
+        <h2>New Terminal</h2>
+        <label>
+          Name
+          <input name="title" maxlength="80" placeholder="OpenCode" />
+        </label>
+        <label>
+          Working directory
+          <input id="cwd-input" name="cwd" />
+        </label>
+        <menu>
+          <button value="cancel" type="button" id="cancel-new-terminal">Cancel</button>
+          <button value="default" type="submit">Create</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="/vendor/xterm/lib/xterm.js"></script>
+    <script src="/vendor/xterm-addon-fit/lib/addon-fit.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
