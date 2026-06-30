@@ -11,7 +11,7 @@ npm install
 npm start
 ```
 
-Then open [http://localhost:3000](http://localhost:3000), create the first username/password, and press **New** to start an OpenCode terminal.
+Then open [http://localhost:8734](http://localhost:8734), create the first username/password, and press **New** to start an OpenCode terminal.
 
 For app-only development without installing OpenCode:
 
@@ -33,7 +33,7 @@ sudo apt-get install -y git curl
 git clone https://github.com/avakiam/openforge.git
 cd openforge
 bash scripts/install-ubuntu.sh
-HOST=0.0.0.0 PORT=3000 npm start
+HOST=0.0.0.0 PORT=8734 npm start
 ```
 
 For a service that restarts automatically:
@@ -43,7 +43,7 @@ bash scripts/install-ubuntu.sh --with-service
 sudo systemctl status openforge
 ```
 
-Then open `http://SERVER_IP:3000`.
+Then open `http://SERVER_IP:8734`.
 
 Manual setup is also fine:
 
@@ -61,10 +61,10 @@ Copy this project to the server, then:
 ```bash
 cd /opt/openforge
 npm install
-HOST=0.0.0.0 PORT=3000 npm start
+HOST=0.0.0.0 PORT=8734 npm start
 ```
 
-Open `http://SERVER_IP:3000`, create the first admin account, and create terminals from the left panel.
+Open `http://SERVER_IP:8734`, create the first admin account, and create terminals from the left panel.
 
 ## Windows Test
 
@@ -77,7 +77,7 @@ powershell -ExecutionPolicy Bypass -File .\scripts\install-windows.ps1
 npm start
 ```
 
-Then open [http://localhost:3000](http://localhost:3000).
+Then open [http://localhost:8734](http://localhost:8734).
 
 OpenForge uses the official OpenCode install script on Linux/macOS:
 
@@ -123,7 +123,7 @@ Restart=always
 RestartSec=3
 Environment=NODE_ENV=production
 Environment=HOST=0.0.0.0
-Environment=PORT=3000
+Environment=PORT=8734
 Environment=OPENFORGE_DATA_DIR=/var/lib/openforge
 Environment=OPENFORGE_DEFAULT_CWD=/srv/openforge-workspaces
 
@@ -151,7 +151,7 @@ server {
     server_name openforge.example.com;
 
     location / {
-        proxy_pass http://127.0.0.1:3000;
+        proxy_pass http://127.0.0.1:8734;
         proxy_http_version 1.1;
         proxy_set_header Upgrade $http_upgrade;
         proxy_set_header Connection "upgrade";
@@ -175,7 +175,7 @@ Environment variables:
 | Variable | Default | Purpose |
 | --- | --- | --- |
 | `HOST` | `0.0.0.0` | Server bind address. |
-| `PORT` | `3000` | Server port. |
+| `PORT` | `8734` | Server port. |
 | `OPENFORGE_DATA_DIR` | `./data` | Stores users, session cookies, and app state. |
 | `OPENFORGE_DEFAULT_CWD` | project directory | Working directory for new terminals. |
 | `OPENFORGE_WORKSPACE_ROOT` | unset | Optional directory boundary for terminal working directories. |

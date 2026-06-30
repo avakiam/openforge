@@ -187,7 +187,7 @@ async function main() {
   });
 
   const host = process.env.HOST || "0.0.0.0";
-  const port = Number(process.env.PORT || 3000);
+  const port = Number(process.env.PORT || 8734);
   server.listen(port, host, () => {
     console.log(`OpenForge listening on http://${host}:${port}`);
   });
