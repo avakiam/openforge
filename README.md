@@ -4,6 +4,8 @@ OpenForge is a small web panel for running multiple long-lived [OpenCode](https:
 
 It creates a first-run admin account, checks whether `opencode` is installed, can install it automatically, and keeps terminal sessions alive on the server when browser tabs disconnect.
 
+The web UI automatically uses English, Spanish, or Catalan based on the browser language, with English as the fallback.
+
 ## Local Test
 
 ```bash

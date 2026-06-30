@@ -243,6 +243,14 @@ input:focus {
   padding: 8px;
 }
 
+.session-row {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 34px;
+  gap: 4px;
+  align-items: stretch;
+  margin-bottom: 4px;
+}
+
 .session-item {
   width: 100%;
   display: grid;
@@ -255,8 +263,10 @@ input:focus {
   text-align: left;
 }
 
-.session-item:hover,
-.session-item.active {
+.session-row:hover .session-item,
+.session-row.active .session-item,
+.session-row:hover .session-close,
+.session-row.active .session-close {
   background: var(--panel-strong);
   border-color: var(--line);
 }
@@ -272,6 +282,27 @@ input:focus {
 .session-item span {
   color: var(--muted);
   font-size: 12px;
+}
+
+.session-close {
+  display: grid;
+  min-width: 34px;
+  min-height: 100%;
+  place-items: center;
+  border: 1px solid transparent;
+  border-radius: 7px;
+  background: transparent;
+  color: var(--muted);
+  font-size: 14px;
+  font-weight: 800;
+  line-height: 1;
+}
+
+.session-close:hover,
+.session-close:focus-visible {
+  border-color: rgba(255, 107, 107, 0.34);
+  background: rgba(255, 107, 107, 0.14);
+  color: #ffd4d4;
 }
 
 .sidebar-bottom {
@@ -410,8 +441,9 @@ dialog::backdrop {
     overflow-y: hidden;
   }
 
-  .session-item {
-    min-width: 180px;
+  .session-row {
+    min-width: 220px;
+    margin-bottom: 0;
   }
 
   .sidebar-bottom {

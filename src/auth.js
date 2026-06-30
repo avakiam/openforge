@@ -12,10 +12,16 @@ function publicUser(user) {
 
 function validateCredentials(username, password) {
   if (!USERNAME_PATTERN.test(username || "")) {
-    return "Username must be 3-32 characters using letters, numbers, dots, underscores, or dashes.";
+    return {
+      code: "invalid_username",
+      message: "Username must be 3-32 characters using letters, numbers, dots, underscores, or dashes."
+    };
   }
   if (typeof password !== "string" || password.length < 8) {
-    return "Password must be at least 8 characters.";
+    return {
+      code: "invalid_password",
+      message: "Password must be at least 8 characters."
+    };
   }
   return null;
 }
@@ -39,7 +45,7 @@ function saveSession(req, user) {
 
 function requireAuth(req, res, next) {
   if (!req.session.user) {
-    res.status(401).json({ error: "Authentication required." });
+    res.status(401).json({ code: "auth_required", error: "Authentication required." });
     return;
   }
   next();
@@ -49,7 +55,7 @@ function attachAuthRoutes(app, store) {
   app.post("/api/setup", async (req, res, next) => {
     try {
       if (store.hasUsers()) {
-        res.status(409).json({ error: "Setup has already been completed." });
+        res.status(409).json({ code: "setup_completed", error: "Setup has already been completed." });
         return;
       }
 
@@ -57,7 +63,7 @@ function attachAuthRoutes(app, store) {
       const password = String(req.body.password || "");
       const validationError = validateCredentials(username, password);
       if (validationError) {
-        res.status(400).json({ error: validationError });
+        res.status(400).json({ code: validationError.code, error: validationError.message });
         return;
       }
 
@@ -77,7 +83,7 @@ function attachAuthRoutes(app, store) {
       const user = store.getUserByUsername(username);
 
       if (!user || !(await bcrypt.compare(password, user.passwordHash))) {
-        res.status(401).json({ error: "Invalid username or password." });
+        res.status(401).json({ code: "invalid_credentials", error: "Invalid username or password." });
         return;
       }
 

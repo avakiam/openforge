@@ -183,7 +183,7 @@ async function main() {
       return;
     }
     console.error(error);
-    res.status(500).json({ error: "Server error." });
+    res.status(500).json({ code: "server_error", error: "Server error." });
   });
 
   const host = process.env.HOST || "0.0.0.0";
