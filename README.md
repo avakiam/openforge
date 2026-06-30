@@ -30,7 +30,7 @@ After publishing this repository to GitHub, a fresh server can install it like t
 ```bash
 sudo apt-get update
 sudo apt-get install -y git curl
-git clone https://github.com/YOUR_USER/openforge.git
+git clone https://github.com/avakiam/openforge.git
 cd openforge
 bash scripts/install-ubuntu.sh
 HOST=0.0.0.0 PORT=3000 npm start
@@ -71,7 +71,7 @@ Open `http://SERVER_IP:3000`, create the first admin account, and create termina
 After publishing this repository to GitHub:
 
 ```powershell
-git clone https://github.com/YOUR_USER/openforge.git
+git clone https://github.com/avakiam/openforge.git
 cd openforge
 powershell -ExecutionPolicy Bypass -File .\scripts\install-windows.ps1
 npm start
