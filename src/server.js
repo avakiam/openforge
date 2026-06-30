@@ -24,6 +24,8 @@ function prependPathOnce(directory) {
 async function main() {
   prependPathOnce(path.join(os.homedir(), ".opencode", "bin"));
 
+  let shuttingDown = false;
+  let restoredSessions = false;
   const store = new Store();
   await store.init();
 
@@ -142,13 +144,41 @@ async function main() {
     next();
   });
 
+  async function restorePersistedSessions() {
+    if (restoredSessions) return;
+    restoredSessions = true;
+
+    const opencodeReady =
+      installer.status.installed ||
+      process.env.OPENFORGE_SKIP_OPENCODE_INSTALL === "1" ||
+      Boolean(process.env.OPENFORGE_OPENCODE_COMMAND);
+
+    if (!opencodeReady) {
+      const savedCount = store.getTerminalSessions().length;
+      if (savedCount > 0) {
+        console.warn(`Skipping restore for ${savedCount} saved terminal session(s): OpenCode is not ready.`);
+      }
+      return;
+    }
+
+    const { restored, failed } = terminals.restoreSessions(store.getTerminalSessions());
+    if (restored.length > 0) {
+      console.log(`Restored ${restored.length} terminal session(s).`);
+      io.emit("sessions:list", terminals.listSessions());
+    }
+    for (const failure of failed) {
+      console.warn(`Failed to restore terminal "${failure.title}" (${failure.cwd}): ${failure.error}`);
+    }
+  }
+
   io.on("connection", (socket) => {
     socket.emit("sessions:list", terminals.listSessions());
     socket.emit("opencode:status", installer.snapshot());
 
-    socket.on("session:create", (payload = {}, ack) => {
+    socket.on("session:create", async (payload = {}, ack) => {
       try {
         const sessionMeta = terminals.createSession(payload);
+        await store.upsertTerminalSession(sessionMeta);
         io.emit("sessions:list", terminals.listSessions());
         if (typeof ack === "function") ack({ ok: true, session: sessionMeta });
       } catch (error) {
@@ -182,9 +212,10 @@ async function main() {
       terminals.resize(payload.id, payload.cols, payload.rows);
     });
 
-    socket.on("session:kill", (payload = {}, ack) => {
+    socket.on("session:kill", async (payload = {}, ack) => {
       try {
         terminals.kill(payload.id);
+        await store.removeTerminalSession(payload.id);
         io.emit("sessions:list", terminals.listSessions());
         if (typeof ack === "function") ack({ ok: true });
       } catch (error) {
@@ -196,7 +227,12 @@ async function main() {
   terminals.on("data", (payload) => {
     io.emit("terminal:data", payload);
   });
-  terminals.on("exit", () => {
+  terminals.on("exit", (session) => {
+    if (!shuttingDown) {
+      store.removeTerminalSession(session.id).catch((error) => {
+        console.error(`Failed to remove exited terminal session ${session.id}:`, error);
+      });
+    }
     io.emit("sessions:list", terminals.listSessions());
   });
   terminals.on("closed", () => {
@@ -222,19 +258,32 @@ async function main() {
   });
 
   if (process.env.OPENFORGE_AUTO_INSTALL !== "0") {
-    installer.ensureInstalled().catch((error) => {
-      installer.status.installing = false;
-      installer.status.error = error.message;
-      installer.emitChange();
-    });
+    installer
+      .ensureInstalled()
+      .then(() => restorePersistedSessions())
+      .catch((error) => {
+        installer.status.installing = false;
+        installer.status.error = error.message;
+        installer.emitChange();
+        restorePersistedSessions().catch((restoreError) => {
+          console.error("Failed to restore terminal sessions:", restoreError);
+        });
+      });
   } else {
-    installer.refresh().catch((error) => {
-      installer.status.error = error.message;
-      installer.emitChange();
-    });
+    installer
+      .refresh()
+      .then(() => restorePersistedSessions())
+      .catch((error) => {
+        installer.status.error = error.message;
+        installer.emitChange();
+        restorePersistedSessions().catch((restoreError) => {
+          console.error("Failed to restore terminal sessions:", restoreError);
+        });
+      });
   }
 
   const shutdown = () => {
+    shuttingDown = true;
     terminals.killAll();
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(1), 5000).unref();

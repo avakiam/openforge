@@ -175,12 +175,14 @@ Terminal sessions survive browser disconnects and page refreshes. They live as l
 
 ## Session Persistence
 
-OpenForge keeps live terminal sessions in memory as server-owned PTY processes.
+OpenForge keeps live terminal processes as server-owned PTYs, and stores each open terminal's name and working directory on disk.
 
-- Browser refresh or disconnect: terminal sessions keep running.
-- OpenForge process restart: live terminal sessions stop and must be recreated.
-- Host reboot: live terminal sessions stop and must be recreated.
-- User accounts and login/session data remain on disk in `OPENFORGE_DATA_DIR`.
+- Browser refresh or disconnect: live terminal processes keep running.
+- OpenForge process restart: saved terminal entries are recreated automatically.
+- Host reboot: saved terminal entries are recreated automatically after OpenForge starts again.
+- User accounts, login/session data, and terminal restore records remain on disk in `OPENFORGE_DATA_DIR`.
+- Terminal process memory and unsaved interactive output cannot survive an OS reboot; OpenForge starts a fresh OpenCode process in the same working directory.
+- Closing a terminal from the UI removes its restore record.
 - With `bash scripts/install-ubuntu.sh --with-service`, systemd enables OpenForge to start again automatically after reboot.
 
 If you do not install the systemd service, start OpenForge manually after reboot with `npm start`.

@@ -12,7 +12,8 @@ function createDefaultState() {
     version: 1,
     createdAt: new Date().toISOString(),
     cookieSecret: crypto.randomBytes(32).toString("hex"),
-    users: []
+    users: [],
+    terminalSessions: []
   };
 }
 
@@ -38,6 +39,10 @@ class Store {
     }
     if (!Array.isArray(this.state.users)) {
       this.state.users = [];
+      changed = true;
+    }
+    if (!Array.isArray(this.state.terminalSessions)) {
+      this.state.terminalSessions = [];
       changed = true;
     }
 
@@ -81,6 +86,39 @@ class Store {
     this.state.users.push(user);
     await this.save();
     return user;
+  }
+
+  getTerminalSessions() {
+    return this.state.terminalSessions.map((session) => ({ ...session }));
+  }
+
+  async upsertTerminalSession(session) {
+    const persisted = {
+      id: session.id,
+      title: session.title,
+      cwd: session.cwd,
+      createdAt: session.createdAt,
+      updatedAt: new Date().toISOString()
+    };
+
+    const index = this.state.terminalSessions.findIndex((item) => item.id === session.id);
+    if (index >= 0) {
+      this.state.terminalSessions[index] = {
+        ...this.state.terminalSessions[index],
+        ...persisted
+      };
+    } else {
+      this.state.terminalSessions.push(persisted);
+    }
+
+    await this.save();
+  }
+
+  async removeTerminalSession(id) {
+    const nextSessions = this.state.terminalSessions.filter((session) => session.id !== id);
+    if (nextSessions.length === this.state.terminalSessions.length) return;
+    this.state.terminalSessions = nextSessions;
+    await this.save();
   }
 }
 

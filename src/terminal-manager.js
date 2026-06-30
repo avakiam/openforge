@@ -97,9 +97,10 @@ class TerminalManager extends EventEmitter {
 
   createSession(options = {}) {
     const cwd = this.resolveCwd(options.cwd);
-    const id = crypto.randomUUID();
+    const id = options.id || crypto.randomUUID();
     const number = this.nextNumber++;
     const title = String(options.title || `OpenCode ${number}`).trim().slice(0, 80) || `OpenCode ${number}`;
+    const createdAt = options.createdAt || new Date().toISOString();
     const cols = Number(options.cols) || 100;
     const rows = Number(options.rows) || 32;
     const command = this.getCommand();
@@ -124,7 +125,7 @@ class TerminalManager extends EventEmitter {
       status: "running",
       exitCode: null,
       signal: null,
-      createdAt: new Date().toISOString(),
+      createdAt,
       updatedAt: new Date().toISOString(),
       displayCommand: command.displayCommand,
       buffer: ""
@@ -150,6 +151,34 @@ class TerminalManager extends EventEmitter {
     this.sessions.set(id, session);
     this.emit("created", this.metadata(session));
     return this.metadata(session);
+  }
+
+  restoreSessions(sessions = []) {
+    const restored = [];
+    const failed = [];
+
+    for (const session of sessions) {
+      if (this.sessions.has(session.id)) continue;
+      try {
+        restored.push(
+          this.createSession({
+            id: session.id,
+            title: session.title,
+            cwd: session.cwd,
+            createdAt: session.createdAt
+          })
+        );
+      } catch (error) {
+        failed.push({
+          id: session.id,
+          title: session.title,
+          cwd: session.cwd,
+          error: error.message
+        });
+      }
+    }
+
+    return { restored, failed };
   }
 
   getSession(id) {
