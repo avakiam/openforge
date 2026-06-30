@@ -7,7 +7,9 @@
     "start": "node src/server.js",
     "check": "node scripts/check.js",
     "install:ubuntu": "bash scripts/install-ubuntu.sh",
-    "install:windows": "powershell -ExecutionPolicy Bypass -File scripts/install-windows.ps1"
+    "install:windows": "powershell -ExecutionPolicy Bypass -File scripts/install-windows.ps1",
+    "update:ubuntu": "bash scripts/update-ubuntu.sh",
+    "update:windows": "powershell -ExecutionPolicy Bypass -File scripts/update-windows.ps1"
   },
   "keywords": [
     "opencode",

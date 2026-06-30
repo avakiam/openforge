@@ -79,6 +79,34 @@ npm start
 
 Then open [http://localhost:8734](http://localhost:8734).
 
+## Updating An Existing Install
+
+Ubuntu clone started manually:
+
+```bash
+cd /path/to/openforge
+bash scripts/update-ubuntu.sh --no-restart
+npm start
+```
+
+Ubuntu systemd service install:
+
+```bash
+cd /path/to/openforge
+bash scripts/update-ubuntu.sh
+sudo systemctl status openforge
+```
+
+Windows:
+
+```powershell
+cd C:\path\to\openforge
+powershell -ExecutionPolicy Bypass -File .\scripts\update-windows.ps1
+npm start
+```
+
+The update scripts keep `data/` and service data intact. They use `git pull --ff-only`, so they stop safely if the server has local code changes that need manual review first.
+
 OpenForge uses the official OpenCode install script on Linux/macOS:
 
 ```bash
