@@ -513,10 +513,13 @@
       renderAgents();
       if (!state.activeAgentId && agents.length) {
         selectAgent(agents[0].id).catch((error) => console.warn(error.message));
+        return;
       }
       if (state.activeAgentId && !agents.some((agent) => agent.id === state.activeAgentId)) {
         selectAgent(agents[0]?.id || null).catch((error) => console.warn(error.message));
+        return;
       }
+      renderAgentStatus();
     });
     state.socket.on("agents:runs", ({ agentId, runs }) => {
       if (agentId === state.activeAgentId) {
@@ -705,7 +708,9 @@
     renderAgentRuns();
   }
 
-  function renderAgentForm(agent = currentAgent()) {
+  // Only touches status-derived bits (buttons, title, subtitle) so it's safe to call on
+  // every live agents:list update without clobbering in-progress edits to the form fields.
+  function renderAgentStatus(agent = currentAgent()) {
     const hasAgent = Boolean(agent);
     const isRunning = hasAgent && agent.status === "running";
     els.agentForm.classList.toggle("hidden", !hasAgent);
@@ -728,6 +733,12 @@
     ]
       .filter(Boolean)
       .join(" | ");
+  }
+
+  function renderAgentForm(agent = currentAgent()) {
+    renderAgentStatus(agent);
+    if (!agent) return;
+
     els.agentNameInput.value = agent.name || "";
     els.agentDescriptionInput.value = agent.description || "";
     els.agentCwdInput.value = agent.cwd || state.status?.defaults?.cwd || "";
