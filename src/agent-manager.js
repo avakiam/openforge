@@ -282,7 +282,11 @@ class AgentManager extends EventEmitter {
       const child = spawn(target.file, target.args, {
         cwd: agent.cwd,
         env: process.env,
-        windowsHide: true
+        windowsHide: true,
+        // Agent runs are unattended: closing stdin makes any interactive prompt
+        // (e.g. a one-time trust confirmation) fail fast on EOF instead of hanging
+        // forever waiting for input nobody can provide.
+        stdio: ["ignore", "pipe", "pipe"]
       });
       const processState = { child, stopRequested: false };
       this.processes.set(agentId, processState);
