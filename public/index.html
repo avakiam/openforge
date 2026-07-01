@@ -49,22 +49,37 @@
       <aside class="sidebar">
         <div class="sidebar-top">
           <div class="brand-row">
-            <span class="mark">OF</span>
-            <div>
-              <strong>OpenForge</strong>
-              <span id="opencode-status" class="status-pill" data-i18n="checking">Checking</span>
+            <div class="brand-id">
+              <span class="mark">OF</span>
+              <div>
+                <strong>OpenForge</strong>
+                <span id="opencode-status" class="status-pill" data-i18n="checking">Checking</span>
+              </div>
             </div>
+            <button id="theme-toggle-button" class="icon-button" type="button" title="Toggle theme" aria-label="Toggle theme" data-i18n-title="toggleTheme" data-i18n-aria-label="toggleTheme">
+              <svg class="icon theme-icon-dark" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M12 3a6.364 6.364 0 0 0 9 9 9 9 0 1 1-9-9Z" />
+              </svg>
+              <svg class="icon theme-icon-light hidden" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <circle cx="12" cy="12" r="4" />
+                <path d="M12 2v2M12 20v2M4.93 4.93l1.41 1.41M17.66 17.66l1.41 1.41M2 12h2M20 12h2M4.93 19.07l1.41-1.41M17.66 6.34l1.41-1.41" />
+              </svg>
+            </button>
           </div>
           <div class="mode-tabs" role="tablist">
             <button id="terminals-mode-button" type="button" class="mode-tab active" data-mode="terminals" data-i18n="terminals">Terminals</button>
             <button id="agents-mode-button" type="button" class="mode-tab" data-mode="agents" data-i18n="agents">Agents</button>
           </div>
           <button id="new-terminal-button" class="primary-action" type="button" title="New terminal" data-i18n-title="newTerminalTitle">
-            <span aria-hidden="true">+</span>
+            <span aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            </span>
             <span data-i18n="newTerminal">New</span>
           </button>
           <button id="new-agent-button" class="primary-action hidden" type="button" title="New agent" data-i18n-title="newAgentTitle">
-            <span aria-hidden="true">+</span>
+            <span aria-hidden="true">
+              <svg class="icon" viewBox="0 0 24 24" stroke-width="2.4" stroke-linecap="round" aria-hidden="true"><path d="M12 5v14M5 12h14" /></svg>
+            </span>
             <span data-i18n="newAgent">New Agent</span>
           </button>
         </div>
@@ -86,7 +101,12 @@
             <p id="terminal-subtitle"></p>
           </div>
           <div class="header-actions">
-            <button id="fit-button" class="icon-button" type="button" title="Fit terminal" aria-label="Fit terminal" data-i18n="fit" data-i18n-title="fitTerminal" data-i18n-aria-label="fitTerminal">Fit</button>
+            <button id="fit-button" class="icon-button" type="button" title="Fit terminal" aria-label="Fit terminal" data-i18n-title="fitTerminal" data-i18n-aria-label="fitTerminal">
+              <svg class="icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+                <path d="M9 3H5a2 2 0 0 0-2 2v4M15 3h4a2 2 0 0 1 2 2v4M9 21H5a2 2 0 0 1-2-2v-4M15 21h4a2 2 0 0 0 2-2v-4" />
+              </svg>
+              <span class="visually-hidden" data-i18n="fit">Fit</span>
+            </button>
             <button id="kill-button" class="danger-action" type="button" data-i18n="close">Close</button>
           </div>
         </header>
@@ -132,39 +152,38 @@
               <span data-i18n="prompt">Prompt</span>
               <textarea id="agent-prompt-input" name="prompt" rows="9"></textarea>
             </label>
-            <div class="schedule-grid">
-              <label>
-                <span data-i18n="model">Model</span>
-                <span class="path-picker-row">
-                  <select id="agent-model-input" name="model"></select>
-                  <button id="refresh-models-button" type="button" class="secondary-action" data-i18n="refresh">Refresh</button>
-                </span>
-              </label>
-              <label>
-                <span data-i18n="effort">Effort level</span>
-                <select id="agent-variant-input" name="variant"></select>
-              </label>
-            </div>
+            <label>
+              <span data-i18n="model">Model</span>
+              <span class="path-picker-row">
+                <select id="agent-model-input" name="model"></select>
+                <button id="refresh-models-button" type="button" class="secondary-action" data-i18n="refresh">Refresh</button>
+              </span>
+            </label>
+            <label>
+              <span data-i18n="effort">Effort level</span>
+              <select id="agent-variant-input" name="variant"></select>
+            </label>
             <label class="checkbox-row">
-              <input id="agent-enabled-input" name="enabled" type="checkbox" />
+              <span class="md-switch">
+                <input id="agent-enabled-input" name="enabled" type="checkbox" />
+                <span class="md-switch-track"><span class="md-switch-thumb"></span></span>
+              </span>
               <span data-i18n="enabled">Enabled</span>
             </label>
-            <div class="schedule-grid">
-              <label>
-                <span data-i18n="runTime">Run time</span>
-                <input id="agent-time-input" name="time" type="time" value="09:00" />
-              </label>
-              <fieldset class="day-picker">
-                <legend data-i18n="runDays">Run days</legend>
-                <label><input type="checkbox" name="days" value="1" /> <span data-i18n="mondayShort">Mon</span></label>
-                <label><input type="checkbox" name="days" value="2" /> <span data-i18n="tuesdayShort">Tue</span></label>
-                <label><input type="checkbox" name="days" value="3" /> <span data-i18n="wednesdayShort">Wed</span></label>
-                <label><input type="checkbox" name="days" value="4" /> <span data-i18n="thursdayShort">Thu</span></label>
-                <label><input type="checkbox" name="days" value="5" /> <span data-i18n="fridayShort">Fri</span></label>
-                <label><input type="checkbox" name="days" value="6" /> <span data-i18n="saturdayShort">Sat</span></label>
-                <label><input type="checkbox" name="days" value="0" /> <span data-i18n="sundayShort">Sun</span></label>
-              </fieldset>
-            </div>
+            <label class="time-field">
+              <span data-i18n="runTime">Run time</span>
+              <input id="agent-time-input" name="time" type="time" value="09:00" />
+            </label>
+            <fieldset class="day-picker">
+              <legend data-i18n="runDays">Run days</legend>
+              <label><input type="checkbox" name="days" value="1" /> <span data-i18n="mondayShort">Mon</span></label>
+              <label><input type="checkbox" name="days" value="2" /> <span data-i18n="tuesdayShort">Tue</span></label>
+              <label><input type="checkbox" name="days" value="3" /> <span data-i18n="wednesdayShort">Wed</span></label>
+              <label><input type="checkbox" name="days" value="4" /> <span data-i18n="thursdayShort">Thu</span></label>
+              <label><input type="checkbox" name="days" value="5" /> <span data-i18n="fridayShort">Fri</span></label>
+              <label><input type="checkbox" name="days" value="6" /> <span data-i18n="saturdayShort">Sat</span></label>
+              <label><input type="checkbox" name="days" value="0" /> <span data-i18n="sundayShort">Sun</span></label>
+            </fieldset>
           </form>
 
           <section class="agent-history">

@@ -1,4 +1,14 @@
 (function () {
+  const THEME_STORAGE_KEY = "openforge-theme";
+
+  function detectTheme() {
+    const stored = localStorage.getItem(THEME_STORAGE_KEY);
+    if (stored === "light" || stored === "dark") return stored;
+    return window.matchMedia?.("(prefers-color-scheme: light)").matches ? "light" : "dark";
+  }
+
+  document.documentElement.dataset.theme = detectTheme();
+
   const I18N = {
     en: {
       firstAdmin: "First Admin",
@@ -10,6 +20,7 @@
       newTerminalTitle: "New terminal",
       terminals: "Terminals",
       installOpenCode: "Install OpenCode",
+      toggleTheme: "Toggle light / dark theme",
       signOut: "Sign Out",
       agents: "Agents",
       newAgent: "New Agent",
@@ -107,6 +118,7 @@
       newTerminalTitle: "Nueva terminal",
       terminals: "Terminales",
       installOpenCode: "Instalar OpenCode",
+      toggleTheme: "Cambiar tema claro / oscuro",
       signOut: "Cerrar sesión",
       agents: "Agentes",
       newAgent: "Nuevo agente",
@@ -204,6 +216,7 @@
       newTerminalTitle: "Terminal nova",
       terminals: "Terminals",
       installOpenCode: "Instal·la OpenCode",
+      toggleTheme: "Canvia tema clar / fosc",
       signOut: "Tanca sessió",
       agents: "Agents",
       newAgent: "Agent nou",
@@ -304,6 +317,7 @@
 
   const state = {
     language: detectLanguage(),
+    theme: document.documentElement.dataset.theme,
     status: null,
     socket: null,
     sessions: [],
@@ -378,6 +392,7 @@
     agentList: document.getElementById("agent-list"),
     opencodeStatus: document.getElementById("opencode-status"),
     installButton: document.getElementById("install-button"),
+    themeToggleButton: document.getElementById("theme-toggle-button"),
     signedInUser: document.getElementById("signed-in-user"),
     logoutButton: document.getElementById("logout-button"),
     terminalTitle: document.getElementById("terminal-title"),
@@ -568,7 +583,8 @@
       closeButton.className = "session-close";
       closeButton.title = t("closeSession");
       closeButton.setAttribute("aria-label", t("closeSessionNamed", { title: session.title }));
-      closeButton.textContent = "x";
+      closeButton.innerHTML =
+        '<svg class="icon" viewBox="0 0 24 24" stroke-width="2" stroke-linecap="round" aria-hidden="true"><path d="M6 6l12 12M18 6L6 18"/></svg>';
 
       button.append(title, detail);
       button.addEventListener("click", () => selectSession(session.id));
@@ -820,6 +836,35 @@
     }
   }
 
+  const TERMINAL_THEMES = {
+    dark: {
+      background: "#0a0d0a",
+      foreground: "#e1e3df",
+      cursor: "#6cdbb2",
+      selectionBackground: "#33564a"
+    },
+    light: {
+      background: "#ffffff",
+      foreground: "#191c19",
+      cursor: "#146c52",
+      selectionBackground: "#bfe8d6"
+    }
+  };
+
+  function applyTerminalTheme() {
+    if (!state.terminal) return;
+    state.terminal.options.theme = TERMINAL_THEMES[state.theme] || TERMINAL_THEMES.dark;
+  }
+
+  function applyTheme(theme) {
+    state.theme = theme;
+    document.documentElement.dataset.theme = theme;
+    localStorage.setItem(THEME_STORAGE_KEY, theme);
+    els.themeToggleButton.querySelector(".theme-icon-dark").classList.toggle("hidden", theme === "light");
+    els.themeToggleButton.querySelector(".theme-icon-light").classList.toggle("hidden", theme !== "light");
+    applyTerminalTheme();
+  }
+
   function currentSession() {
     return state.sessions.find((session) => session.id === state.activeId) || null;
   }
@@ -832,12 +877,7 @@
       fontFamily: "Consolas, 'Cascadia Mono', 'SFMono-Regular', Menlo, monospace",
       fontSize: 14,
       lineHeight: 1.18,
-      theme: {
-        background: "#08090b",
-        foreground: "#f3f5f7",
-        cursor: "#4dbd91",
-        selectionBackground: "#315b4b"
-      }
+      theme: TERMINAL_THEMES[state.theme] || TERMINAL_THEMES.dark
     });
     state.fitAddon = new FitAddon.FitAddon();
     state.terminal.loadAddon(state.fitAddon);
@@ -1070,6 +1110,10 @@
     }
   });
 
+  els.themeToggleButton.addEventListener("click", () => {
+    applyTheme(state.theme === "light" ? "dark" : "light");
+  });
+
   els.logoutButton.addEventListener("click", async () => {
     await api("/api/logout", { method: "POST" });
     if (state.socket) state.socket.disconnect();
@@ -1223,5 +1267,6 @@
 
   window.addEventListener("resize", fitTerminal);
   translateStaticUi();
+  applyTheme(state.theme);
   boot();
 })();
