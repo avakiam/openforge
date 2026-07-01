@@ -189,6 +189,16 @@ async function main() {
     res.json({ runs: store.getAgentRuns(req.params.id, 50) });
   });
 
+  app.delete("/api/agents/:id/runs", requireAuth, async (req, res, next) => {
+    try {
+      await store.clearAgentRuns(req.params.id);
+      agents.emit("runs:changed", { agentId: req.params.id, runs: store.getAgentRuns(req.params.id) });
+      res.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.post("/api/agents/:id/run", requireAuth, async (req, res, next) => {
     try {
       agents.runAgent(req.params.id, "manual").catch((error) => {

@@ -63,6 +63,9 @@
       runTime: "Run time",
       runDays: "Run days",
       runHistory: "Run History",
+      clearHistory: "Clear history",
+      clearHistoryConfirm: "Clear this agent's run history?",
+      unableClearHistory: "Unable to clear history.",
       noAgentSelected: "No agent selected",
       noRuns: "No runs yet",
       nextRun: "Next run",
@@ -190,6 +193,9 @@
       runTime: "Hora",
       runDays: "Días",
       runHistory: "Historial",
+      clearHistory: "Borrar historial",
+      clearHistoryConfirm: "¿Borrar el historial de ejecuciones de este agente?",
+      unableClearHistory: "No se pudo borrar el historial.",
       noAgentSelected: "Ningún agente seleccionado",
       noRuns: "Todavía no hay ejecuciones",
       nextRun: "Próxima ejecución",
@@ -317,6 +323,9 @@
       runTime: "Hora",
       runDays: "Dies",
       runHistory: "Historial",
+      clearHistory: "Esborra l'historial",
+      clearHistoryConfirm: "Vols esborrar l'historial d'execucions d'aquest agent?",
+      unableClearHistory: "No s'ha pogut esborrar l'historial.",
       noAgentSelected: "Cap agent seleccionat",
       noRuns: "Encara no hi ha execucions",
       nextRun: "Proper execució",
@@ -522,6 +531,7 @@
     agentEnabledInput: document.getElementById("agent-enabled-input"),
     agentTimeInput: document.getElementById("agent-time-input"),
     agentRuns: document.getElementById("agent-runs"),
+    clearRunsButton: document.getElementById("clear-runs-button"),
     runAgentButton: document.getElementById("run-agent-button"),
     stopAgentButton: document.getElementById("stop-agent-button"),
     saveAgentButton: document.getElementById("save-agent-button"),
@@ -1010,9 +1020,18 @@
     await selectAgent(response.agent.id);
   }
 
+  // Strip ANSI escape sequences (colors, cursor codes) so the ESC char doesn't render
+  // as a box in the run history. The live terminal keeps its own raw stream.
+  function stripAnsi(text) {
+    // eslint-disable-next-line no-control-regex
+    return String(text).replace(/\x1b\[[0-9;]*[A-Za-z]/g, "");
+  }
+
   function renderAgentRuns() {
+    const hasRuns = state.agentRuns.length > 0;
+    els.clearRunsButton.classList.toggle("hidden", !hasRuns || state.activeAgentId === "__new");
     els.agentRuns.replaceChildren();
-    if (!state.agentRuns.length) {
+    if (!hasRuns) {
       const empty = document.createElement("div");
       empty.className = "directory-empty";
       empty.textContent = t("noRuns");
@@ -1034,7 +1053,7 @@
 
       const output = document.createElement("pre");
       output.className = "run-output";
-      output.textContent = [run.stdout, run.stderr, run.error].filter(Boolean).join("\n").trim();
+      output.textContent = stripAnsi([run.stdout, run.stderr, run.error].filter(Boolean).join("\n")).trim();
       if (!output.textContent) output.textContent = run.command ? `${run.command} ${run.args.join(" ")}` : "";
 
       item.append(header, output);
@@ -1453,6 +1472,18 @@
       await loadAgents();
     } catch (error) {
       alert(error.message);
+    }
+  });
+
+  els.clearRunsButton.addEventListener("click", async () => {
+    const agent = currentAgent();
+    if (!agent || !confirm(t("clearHistoryConfirm"))) return;
+    try {
+      await api(`/api/agents/${encodeURIComponent(agent.id)}/runs`, { method: "DELETE" });
+      state.agentRuns = [];
+      renderAgentRuns();
+    } catch (error) {
+      alert(error.message || t("unableClearHistory"));
     }
   });
 

@@ -191,7 +191,10 @@
           </form>
 
           <section class="agent-history">
-            <h3 data-i18n="runHistory">Run History</h3>
+            <div class="agent-history-header">
+              <h3 data-i18n="runHistory">Run History</h3>
+              <button id="clear-runs-button" class="ghost-action" type="button" data-i18n="clearHistory">Clear history</button>
+            </div>
             <div id="agent-runs" class="run-list"></div>
           </section>
         </div>

@@ -214,6 +214,16 @@ class Store {
     return true;
   }
 
+  async clearAgentRuns(agentId) {
+    const before = this.state.agentRuns.length;
+    this.state.agentRuns = this.state.agentRuns.filter(
+      (run) => run.agentId !== agentId || run.status === "running"
+    );
+    if (this.state.agentRuns.length === before) return false;
+    await this.save();
+    return true;
+  }
+
   getAgentRuns(agentId, limit = 25) {
     return this.state.agentRuns
       .filter((run) => !agentId || run.agentId === agentId)

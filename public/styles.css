@@ -818,10 +818,23 @@ textarea::placeholder {
   gap: 12px;
 }
 
+.agent-history-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
 .agent-history h3 {
   margin: 0;
   font-size: 15px;
   font-weight: 500;
+}
+
+.agent-history-header .ghost-action {
+  min-height: 32px;
+  padding: 0 14px;
+  font-size: 12px;
 }
 
 .run-list {
