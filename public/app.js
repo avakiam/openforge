@@ -21,7 +21,14 @@
       terminals: "Terminals",
       installOpenCode: "Install OpenCode",
       toggleTheme: "Toggle light / dark theme",
-      security: "Security",
+      settings: "Settings",
+      passwordSection: "Password",
+      changePassword: "Change password",
+      currentPassword: "Current password",
+      newPassword: "New password",
+      confirmPassword: "Confirm new password",
+      passwordSaved: "Password updated.",
+      unableSavePassword: "Unable to update password.",
       securitySettings: "Login Security",
       captchaProvider: "Captcha provider",
       captchaNone: "None",
@@ -126,7 +133,9 @@
       error_captcha_keys_required: "Site key and secret key are required.",
       error_captcha_required: "Please complete the captcha.",
       error_captcha_failed: "Captcha verification failed.",
-      error_captcha_unavailable: "Could not reach the captcha verification service."
+      error_captcha_unavailable: "Could not reach the captcha verification service.",
+      error_password_mismatch: "New password and confirmation do not match.",
+      error_invalid_current_password: "Current password is incorrect."
     },
     es: {
       firstAdmin: "Primer administrador",
@@ -139,7 +148,14 @@
       terminals: "Terminales",
       installOpenCode: "Instalar OpenCode",
       toggleTheme: "Cambiar tema claro / oscuro",
-      security: "Seguridad",
+      settings: "Configuración",
+      passwordSection: "Contraseña",
+      changePassword: "Cambiar contraseña",
+      currentPassword: "Contraseña actual",
+      newPassword: "Nueva contraseña",
+      confirmPassword: "Confirmar nueva contraseña",
+      passwordSaved: "Contraseña actualizada.",
+      unableSavePassword: "No se pudo actualizar la contraseña.",
       securitySettings: "Seguridad del inicio de sesión",
       captchaProvider: "Proveedor de captcha",
       captchaNone: "Ninguno",
@@ -244,7 +260,9 @@
       error_captcha_keys_required: "Se requieren la clave de sitio y la clave secreta.",
       error_captcha_required: "Completa el captcha.",
       error_captcha_failed: "La verificación del captcha ha fallado.",
-      error_captcha_unavailable: "No se pudo contactar con el servicio de verificación del captcha."
+      error_captcha_unavailable: "No se pudo contactar con el servicio de verificación del captcha.",
+      error_password_mismatch: "La nueva contraseña y la confirmación no coinciden.",
+      error_invalid_current_password: "La contraseña actual no es correcta."
     },
     ca: {
       firstAdmin: "Primer administrador",
@@ -257,7 +275,14 @@
       terminals: "Terminals",
       installOpenCode: "Instal·la OpenCode",
       toggleTheme: "Canvia tema clar / fosc",
-      security: "Seguretat",
+      settings: "Configuració",
+      passwordSection: "Contrasenya",
+      changePassword: "Canvia la contrasenya",
+      currentPassword: "Contrasenya actual",
+      newPassword: "Nova contrasenya",
+      confirmPassword: "Confirma la nova contrasenya",
+      passwordSaved: "Contrasenya actualitzada.",
+      unableSavePassword: "No s'ha pogut actualitzar la contrasenya.",
       securitySettings: "Seguretat de l'inici de sessió",
       captchaProvider: "Proveïdor de captcha",
       captchaNone: "Cap",
@@ -362,7 +387,9 @@
       error_captcha_keys_required: "Calen la clau del lloc i la clau secreta.",
       error_captcha_required: "Completa el captcha.",
       error_captcha_failed: "La verificació del captcha ha fallat.",
-      error_captcha_unavailable: "No s'ha pogut contactar amb el servei de verificació del captcha."
+      error_captcha_unavailable: "No s'ha pogut contactar amb el servei de verificació del captcha.",
+      error_password_mismatch: "La nova contrasenya i la confirmació no coincideixen.",
+      error_invalid_current_password: "La contrasenya actual no és correcta."
     }
   };
 
@@ -500,8 +527,15 @@
     saveAgentButton: document.getElementById("save-agent-button"),
     deleteAgentButton: document.getElementById("delete-agent-button"),
     loginCaptcha: document.getElementById("login-captcha"),
-    securitySettingsButton: document.getElementById("security-settings-button"),
-    securityDialog: document.getElementById("security-dialog"),
+    accountMenuButton: document.getElementById("account-menu-button"),
+    accountAvatar: document.getElementById("account-avatar"),
+    settingsDialog: document.getElementById("settings-dialog"),
+    closeSettingsButton: document.getElementById("close-settings-button"),
+    currentPasswordInput: document.getElementById("current-password-input"),
+    newPasswordInput: document.getElementById("new-password-input"),
+    confirmPasswordInput: document.getElementById("confirm-password-input"),
+    passwordMessage: document.getElementById("password-message"),
+    savePasswordButton: document.getElementById("save-password-button"),
     securityProviderInput: document.getElementById("security-provider-input"),
     securityKeyFields: document.getElementById("security-key-fields"),
     securitySiteKeyInput: document.getElementById("security-site-key-input"),
@@ -509,7 +543,6 @@
     securityMinScoreField: document.getElementById("security-min-score-field"),
     securityMinScoreInput: document.getElementById("security-min-score-input"),
     securityMessage: document.getElementById("security-message"),
-    cancelSecurity: document.getElementById("cancel-security"),
     saveSecurityButton: document.getElementById("save-security-button")
   };
 
@@ -646,6 +679,7 @@
   function setStatus(status) {
     state.status = status;
     els.signedInUser.textContent = status.user ? `@${status.user.username}` : "";
+    els.accountAvatar.textContent = status.user?.username ? status.user.username[0] : "";
     els.cwdInput.value = status.defaults?.cwd || "";
     renderOpencode(status.opencode);
     if (!status.authenticated) setupLoginCaptcha(status.security).catch((error) => console.warn(error.message));
@@ -1434,10 +1468,25 @@
     els.securityMinScoreField.classList.toggle("hidden", provider !== "recaptcha_v3");
   }
 
-  async function openSecurityDialog() {
+  function switchSettingsSection(name) {
+    for (const item of document.querySelectorAll(".settings-nav-item")) {
+      item.classList.toggle("active", item.dataset.section === name);
+    }
+    for (const section of document.querySelectorAll(".settings-section")) {
+      section.classList.toggle("hidden", section.id !== `settings-section-${name}`);
+    }
+  }
+
+  async function openSettingsDialog() {
+    els.currentPasswordInput.value = "";
+    els.newPasswordInput.value = "";
+    els.confirmPasswordInput.value = "";
+    els.passwordMessage.textContent = "";
+    els.passwordMessage.classList.remove("success");
     els.securityMessage.textContent = "";
     els.securityMessage.classList.remove("success");
-    els.securityDialog.showModal();
+    switchSettingsSection("password");
+    els.settingsDialog.showModal();
     try {
       const data = await api("/api/security");
       els.securityProviderInput.value = data.security.captchaProvider;
@@ -1446,19 +1495,47 @@
       els.securityMinScoreInput.value = data.security.recaptchaMinScore ?? 0.5;
       updateSecurityFieldVisibility();
     } catch (error) {
-      alert(error.message || t("unableLoadSecurity"));
-      els.securityDialog.close();
+      els.securityMessage.textContent = error.message || t("unableLoadSecurity");
     }
   }
 
-  els.securitySettingsButton.addEventListener("click", () => {
-    openSecurityDialog();
+  els.accountMenuButton.addEventListener("click", () => {
+    openSettingsDialog();
   });
+
+  for (const item of document.querySelectorAll(".settings-nav-item")) {
+    item.addEventListener("click", () => switchSettingsSection(item.dataset.section));
+  }
 
   els.securityProviderInput.addEventListener("change", updateSecurityFieldVisibility);
 
-  els.cancelSecurity.addEventListener("click", () => {
-    els.securityDialog.close();
+  els.closeSettingsButton.addEventListener("click", () => {
+    els.settingsDialog.close();
+  });
+
+  els.savePasswordButton.addEventListener("click", async () => {
+    els.passwordMessage.textContent = "";
+    els.passwordMessage.classList.remove("success");
+    if (els.newPasswordInput.value !== els.confirmPasswordInput.value) {
+      els.passwordMessage.textContent = t("error_password_mismatch");
+      return;
+    }
+    try {
+      await api("/api/account/password", {
+        method: "PUT",
+        body: {
+          currentPassword: els.currentPasswordInput.value,
+          newPassword: els.newPasswordInput.value
+        }
+      });
+      els.currentPasswordInput.value = "";
+      els.newPasswordInput.value = "";
+      els.confirmPasswordInput.value = "";
+      els.passwordMessage.classList.add("success");
+      els.passwordMessage.textContent = t("passwordSaved");
+    } catch (error) {
+      els.passwordMessage.textContent = error.message || t("unableSavePassword");
+    }
   });
 
   els.saveSecurityButton.addEventListener("click", async () => {

@@ -269,9 +269,16 @@ Environment variables:
 | `OPENFORGE_TRUST_PROXY` | unset | Set to `1` behind a reverse proxy. |
 | `OPENFORGE_AGENT_TIMEOUT_MS` | `1200000` (20 min) | Kills an agent run that exceeds this duration. |
 
-## Login Security (Captcha)
+## Account Settings
 
-Once you're signed in, the **Seguridad / Security** button at the bottom of the sidebar opens login security settings. From there you can require a captcha on the sign-in form:
+Once you're signed in, click your avatar at the bottom of the sidebar to open account settings. It has two sections:
+
+- **Password** — change the admin password (requires the current password).
+- **Login Security** — configure a captcha for the sign-in form.
+
+### Login Security (Captcha)
+
+From the Login Security section you can require a captcha on the sign-in form:
 
 - **None** (default) — no captcha, no external requests.
 - **reCAPTCHA v2** — visible "I'm not a robot" checkbox.

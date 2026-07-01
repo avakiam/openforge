@@ -133,6 +133,14 @@ class Store {
     return user;
   }
 
+  async updateUserPassword(id, passwordHash) {
+    const user = this.state.users.find((item) => item.id === id);
+    if (!user) return false;
+    user.passwordHash = passwordHash;
+    await this.save();
+    return true;
+  }
+
   getTerminalSessions() {
     return this.state.terminalSessions.map((session) => ({ ...session }));
   }

@@ -105,6 +105,30 @@ function attachAuthRoutes(app, store) {
     }
   });
 
+  app.put("/api/account/password", requireAuth, async (req, res, next) => {
+    try {
+      const currentPassword = String(req.body.currentPassword || "");
+      const newPassword = String(req.body.newPassword || "");
+
+      const user = store.getUserById(req.session.user.id);
+      if (!user || !(await bcrypt.compare(currentPassword, user.passwordHash))) {
+        res.status(401).json({ code: "invalid_current_password", error: "Current password is incorrect." });
+        return;
+      }
+
+      if (newPassword.length < 8) {
+        res.status(400).json({ code: "invalid_password", error: "Password must be at least 8 characters." });
+        return;
+      }
+
+      const passwordHash = await bcrypt.hash(newPassword, 12);
+      await store.updateUserPassword(user.id, passwordHash);
+      res.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
   app.post("/api/logout", (req, res, next) => {
     req.session.destroy((error) => {
       if (error) {
