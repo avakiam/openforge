@@ -24,6 +24,7 @@ class Store {
     this.dataDir = getDataDir();
     this.stateFile = path.join(this.dataDir, "state.json");
     this.state = createDefaultState();
+    this.saveQueue = Promise.resolve();
   }
 
   async init() {
@@ -61,7 +62,17 @@ class Store {
     }
   }
 
+  // Concurrent callers (e.g. rapid stdout/stderr chunks from an agent run) can each
+  // trigger a save() before the previous one finishes. Since every call writes to the
+  // same pid-based tmp file, overlapping writes race on the rename and one of them fails
+  // with ENOENT because the other already renamed it away. Chaining through saveQueue
+  // ensures only one write+rename is in flight at a time.
   async save() {
+    this.saveQueue = this.saveQueue.catch(() => {}).then(() => this.writeState());
+    return this.saveQueue;
+  }
+
+  async writeState() {
     await fsp.mkdir(this.dataDir, { recursive: true });
     const tmpFile = `${this.stateFile}.${process.pid}.tmp`;
     await fsp.writeFile(tmpFile, `${JSON.stringify(this.state, null, 2)}\n`, { mode: 0o600 });
