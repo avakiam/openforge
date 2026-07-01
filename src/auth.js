@@ -1,4 +1,5 @@
 const bcrypt = require("bcryptjs");
+const { verifyCaptcha } = require("./captcha");
 
 const USERNAME_PATTERN = /^[a-zA-Z0-9_.-]{3,32}$/;
 
@@ -78,6 +79,16 @@ function attachAuthRoutes(app, store) {
 
   app.post("/api/login", async (req, res, next) => {
     try {
+      const captchaResult = await verifyCaptcha(
+        store.getSecuritySettings(),
+        req.body.captchaToken,
+        req.ip
+      );
+      if (!captchaResult.ok) {
+        res.status(400).json({ code: captchaResult.code, error: captchaResult.error });
+        return;
+      }
+
       const username = String(req.body.username || "").trim();
       const password = String(req.body.password || "");
       const user = store.getUserByUsername(username);

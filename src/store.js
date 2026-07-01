@@ -7,6 +7,15 @@ function getDataDir() {
   return path.resolve(process.env.OPENFORGE_DATA_DIR || path.join(process.cwd(), "data"));
 }
 
+function createDefaultSecurity() {
+  return {
+    captchaProvider: "none",
+    siteKey: "",
+    secretKey: "",
+    recaptchaMinScore: 0.5
+  };
+}
+
 function createDefaultState() {
   return {
     version: 1,
@@ -15,7 +24,8 @@ function createDefaultState() {
     users: [],
     terminalSessions: [],
     agents: [],
-    agentRuns: []
+    agentRuns: [],
+    security: createDefaultSecurity()
   };
 }
 
@@ -56,6 +66,10 @@ class Store {
       this.state.agentRuns = [];
       changed = true;
     }
+    if (!this.state.security || typeof this.state.security !== "object") {
+      this.state.security = createDefaultSecurity();
+      changed = true;
+    }
 
     if (changed || !fs.existsSync(this.stateFile)) {
       await this.save();
@@ -81,6 +95,16 @@ class Store {
 
   hasUsers() {
     return this.state.users.length > 0;
+  }
+
+  getSecuritySettings() {
+    return { ...createDefaultSecurity(), ...this.state.security };
+  }
+
+  async updateSecuritySettings(patch) {
+    this.state.security = { ...this.getSecuritySettings(), ...patch };
+    await this.save();
+    return this.getSecuritySettings();
   }
 
   getSessionSecret() {

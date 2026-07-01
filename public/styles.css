@@ -492,6 +492,10 @@ textarea::placeholder {
   font-size: 13px;
 }
 
+.message.success {
+  color: var(--md-primary);
+}
+
 /* ==========================================================================
    App shell
    ========================================================================== */
@@ -901,6 +905,11 @@ dialog::backdrop {
   display: grid;
   gap: 18px;
   padding: 24px;
+}
+
+#security-key-fields {
+  display: grid;
+  gap: 18px;
 }
 
 .dialog-form menu {

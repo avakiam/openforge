@@ -38,6 +38,7 @@
             <span data-i18n="password">Password</span>
             <input name="password" type="password" autocomplete="current-password" required />
           </label>
+          <div id="login-captcha" class="hidden"></div>
           <button type="submit" data-i18n="signIn">Sign In</button>
         </form>
 
@@ -89,6 +90,7 @@
 
         <div class="sidebar-bottom">
           <button id="install-button" class="secondary-action hidden" type="button" data-i18n="installOpenCode">Install OpenCode</button>
+          <button id="security-settings-button" class="ghost-action" type="button" data-i18n="security">Security</button>
           <span id="signed-in-user" class="muted"></span>
           <button id="logout-button" class="ghost-action" type="button" data-i18n="signOut">Sign Out</button>
         </div>
@@ -238,6 +240,44 @@
         <menu>
           <button value="cancel" type="button" id="cancel-close-session" data-i18n="cancel">Cancel</button>
           <button value="default" type="button" id="confirm-close-session" class="danger-action" data-i18n="close">Close</button>
+        </menu>
+      </form>
+    </dialog>
+
+    <dialog id="security-dialog">
+      <form id="security-form" method="dialog" class="dialog-form">
+        <h2 data-i18n="securitySettings">Login Security</h2>
+        <label>
+          <span data-i18n="captchaProvider">Captcha provider</span>
+          <select id="security-provider-input" name="captchaProvider">
+            <option value="none" data-i18n="captchaNone">None</option>
+            <option value="recaptcha_v2" data-i18n="captchaRecaptchaV2">reCAPTCHA v2</option>
+            <option value="recaptcha_v3" data-i18n="captchaRecaptchaV3">reCAPTCHA v3</option>
+            <option value="turnstile" data-i18n="captchaTurnstile">Cloudflare Turnstile</option>
+          </select>
+        </label>
+        <div id="security-key-fields" class="hidden">
+          <label>
+            <span data-i18n="siteKey">Site key</span>
+            <input id="security-site-key-input" name="siteKey" autocomplete="off" spellcheck="false" />
+          </label>
+          <label>
+            <span data-i18n="secretKey">Secret key</span>
+            <input id="security-secret-key-input" name="secretKey" type="password" autocomplete="off" spellcheck="false" />
+          </label>
+          <label id="security-min-score-field" class="hidden">
+            <span data-i18n="minScore">Minimum score</span>
+            <input id="security-min-score-input" name="recaptchaMinScore" type="number" min="0" max="1" step="0.1" value="0.5" />
+          </label>
+        </div>
+        <p class="dialog-copy" data-i18n="securityHelp">
+          Login will require solving this captcha. If you get locked out, edit "security" in your data
+          directory's state.json and restart OpenForge.
+        </p>
+        <p id="security-message" class="message" role="status"></p>
+        <menu>
+          <button value="cancel" type="button" id="cancel-security" data-i18n="cancel">Cancel</button>
+          <button value="default" type="button" id="save-security-button" data-i18n="save">Save</button>
         </menu>
       </form>
     </dialog>

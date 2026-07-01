@@ -269,6 +269,19 @@ Environment variables:
 | `OPENFORGE_TRUST_PROXY` | unset | Set to `1` behind a reverse proxy. |
 | `OPENFORGE_AGENT_TIMEOUT_MS` | `1200000` (20 min) | Kills an agent run that exceeds this duration. |
 
+## Login Security (Captcha)
+
+Once you're signed in, the **Seguridad / Security** button at the bottom of the sidebar opens login security settings. From there you can require a captcha on the sign-in form:
+
+- **None** (default) — no captcha, no external requests.
+- **reCAPTCHA v2** — visible "I'm not a robot" checkbox.
+- **reCAPTCHA v3** — invisible, scores the request and lets you set a minimum score (0-1).
+- **Cloudflare Turnstile** — visible or invisible depending on how the site key was created.
+
+You'll need a site key and secret key from the provider's own console ([Google reCAPTCHA admin](https://www.google.com/recaptcha/admin), [Cloudflare Turnstile](https://dash.cloudflare.com/?to=/:account/turnstile)). The secret key never leaves the server; only the site key is sent to the browser. This only protects `/api/login` — the very first admin account creation (`/api/setup`) is not gated, since it happens before any security settings can exist.
+
+If you get locked out (wrong keys, or the verification endpoint is unreachable from your server), edit `security.captchaProvider` back to `"none"` in `state.json` inside your `OPENFORGE_DATA_DIR` and restart OpenForge.
+
 ## Security Notes
 
 This app gives authenticated users browser access to real shell processes on the host. Use a strong password, HTTPS, a firewall, and a non-root service user. Do not expose it publicly without those controls.

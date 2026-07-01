@@ -81,6 +81,7 @@ async function main() {
 
   app.get("/api/status", (req, res) => {
     const user = req.session.user ? store.getUserById(req.session.user.id) : null;
+    const security = store.getSecuritySettings();
     res.json({
       configured: store.hasUsers(),
       authenticated: Boolean(user),
@@ -89,11 +90,50 @@ async function main() {
       defaults: {
         cwd: terminals.defaultCwd,
         workspaceRoot: terminals.workspaceRoot
+      },
+      security: {
+        captchaProvider: security.captchaProvider,
+        siteKey: security.siteKey
       }
     });
   });
 
   attachAuthRoutes(app, store);
+
+  const CAPTCHA_PROVIDERS = new Set(["none", "recaptcha_v2", "recaptcha_v3", "turnstile"]);
+
+  app.get("/api/security", requireAuth, (req, res) => {
+    res.json({ security: store.getSecuritySettings() });
+  });
+
+  app.put("/api/security", requireAuth, async (req, res, next) => {
+    try {
+      const captchaProvider = String(req.body.captchaProvider || "none");
+      if (!CAPTCHA_PROVIDERS.has(captchaProvider)) {
+        res.status(400).json({ code: "invalid_captcha_provider", error: "Invalid captcha provider." });
+        return;
+      }
+
+      const siteKey = String(req.body.siteKey || "").trim().slice(0, 500);
+      const secretKey = String(req.body.secretKey || "").trim().slice(0, 500);
+      const recaptchaMinScore = Math.min(1, Math.max(0, Number(req.body.recaptchaMinScore) || 0));
+
+      if (captchaProvider !== "none" && (!siteKey || !secretKey)) {
+        res.status(400).json({ code: "captcha_keys_required", error: "Site key and secret key are required." });
+        return;
+      }
+
+      const security = await store.updateSecuritySettings({
+        captchaProvider,
+        siteKey,
+        secretKey,
+        recaptchaMinScore: recaptchaMinScore || 0.5
+      });
+      res.json({ security });
+    } catch (error) {
+      next(error);
+    }
+  });
 
   app.get("/api/sessions", requireAuth, (req, res) => {
     res.json({ sessions: terminals.listSessions() });

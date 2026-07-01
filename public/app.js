@@ -21,6 +21,21 @@
       terminals: "Terminals",
       installOpenCode: "Install OpenCode",
       toggleTheme: "Toggle light / dark theme",
+      security: "Security",
+      securitySettings: "Login Security",
+      captchaProvider: "Captcha provider",
+      captchaNone: "None",
+      captchaRecaptchaV2: "reCAPTCHA v2",
+      captchaRecaptchaV3: "reCAPTCHA v3",
+      captchaTurnstile: "Cloudflare Turnstile",
+      siteKey: "Site key",
+      secretKey: "Secret key",
+      minScore: "Minimum score",
+      securityHelp:
+        "Login will require solving this captcha. If you get locked out, edit \"security\" in your data directory's state.json and restart OpenForge.",
+      securitySaved: "Security settings saved.",
+      unableLoadSecurity: "Unable to load security settings.",
+      unableSaveSecurity: "Unable to save security settings.",
       signOut: "Sign Out",
       agents: "Agents",
       newAgent: "New Agent",
@@ -106,7 +121,12 @@
       error_agent_not_found: "Agent not found.",
       error_agent_prompt_required: "Agent prompt is required.",
       error_agent_already_running: "Agent is already running.",
-      error_agent_not_running: "Agent is not running."
+      error_agent_not_running: "Agent is not running.",
+      error_invalid_captcha_provider: "Invalid captcha provider.",
+      error_captcha_keys_required: "Site key and secret key are required.",
+      error_captcha_required: "Please complete the captcha.",
+      error_captcha_failed: "Captcha verification failed.",
+      error_captcha_unavailable: "Could not reach the captcha verification service."
     },
     es: {
       firstAdmin: "Primer administrador",
@@ -119,6 +139,21 @@
       terminals: "Terminales",
       installOpenCode: "Instalar OpenCode",
       toggleTheme: "Cambiar tema claro / oscuro",
+      security: "Seguridad",
+      securitySettings: "Seguridad del inicio de sesión",
+      captchaProvider: "Proveedor de captcha",
+      captchaNone: "Ninguno",
+      captchaRecaptchaV2: "reCAPTCHA v2",
+      captchaRecaptchaV3: "reCAPTCHA v3",
+      captchaTurnstile: "Cloudflare Turnstile",
+      siteKey: "Clave de sitio",
+      secretKey: "Clave secreta",
+      minScore: "Puntuación mínima",
+      securityHelp:
+        "El inicio de sesión requerirá resolver este captcha. Si te quedas bloqueado, edita \"security\" en el state.json de tu directorio de datos y reinicia OpenForge.",
+      securitySaved: "Configuración de seguridad guardada.",
+      unableLoadSecurity: "No se pudo cargar la configuración de seguridad.",
+      unableSaveSecurity: "No se pudo guardar la configuración de seguridad.",
       signOut: "Cerrar sesión",
       agents: "Agentes",
       newAgent: "Nuevo agente",
@@ -204,7 +239,12 @@
       error_agent_not_found: "Agente no encontrado.",
       error_agent_prompt_required: "El prompt del agente es obligatorio.",
       error_agent_already_running: "El agente ya se está ejecutando.",
-      error_agent_not_running: "El agente no se está ejecutando."
+      error_agent_not_running: "El agente no se está ejecutando.",
+      error_invalid_captcha_provider: "Proveedor de captcha no válido.",
+      error_captcha_keys_required: "Se requieren la clave de sitio y la clave secreta.",
+      error_captcha_required: "Completa el captcha.",
+      error_captcha_failed: "La verificación del captcha ha fallado.",
+      error_captcha_unavailable: "No se pudo contactar con el servicio de verificación del captcha."
     },
     ca: {
       firstAdmin: "Primer administrador",
@@ -217,6 +257,21 @@
       terminals: "Terminals",
       installOpenCode: "Instal·la OpenCode",
       toggleTheme: "Canvia tema clar / fosc",
+      security: "Seguretat",
+      securitySettings: "Seguretat de l'inici de sessió",
+      captchaProvider: "Proveïdor de captcha",
+      captchaNone: "Cap",
+      captchaRecaptchaV2: "reCAPTCHA v2",
+      captchaRecaptchaV3: "reCAPTCHA v3",
+      captchaTurnstile: "Cloudflare Turnstile",
+      siteKey: "Clau del lloc",
+      secretKey: "Clau secreta",
+      minScore: "Puntuació mínima",
+      securityHelp:
+        "L'inici de sessió requerirà resoldre aquest captcha. Si et quedes bloquejat, edita \"security\" a l'state.json del teu directori de dades i reinicia OpenForge.",
+      securitySaved: "Configuració de seguretat desada.",
+      unableLoadSecurity: "No s'ha pogut carregar la configuració de seguretat.",
+      unableSaveSecurity: "No s'ha pogut desar la configuració de seguretat.",
       signOut: "Tanca sessió",
       agents: "Agents",
       newAgent: "Agent nou",
@@ -302,7 +357,12 @@
       error_agent_not_found: "No s'ha trobat l'agent.",
       error_agent_prompt_required: "El prompt de l'agent és obligatori.",
       error_agent_already_running: "L'agent ja s'està executant.",
-      error_agent_not_running: "L'agent no s'està executant."
+      error_agent_not_running: "L'agent no s'està executant.",
+      error_invalid_captcha_provider: "Proveïdor de captcha no vàlid.",
+      error_captcha_keys_required: "Calen la clau del lloc i la clau secreta.",
+      error_captcha_required: "Completa el captcha.",
+      error_captcha_failed: "La verificació del captcha ha fallat.",
+      error_captcha_unavailable: "No s'ha pogut contactar amb el servei de verificació del captcha."
     }
   };
 
@@ -332,7 +392,8 @@
     resizeObserver: null,
     pendingCloseId: null,
     directoryPath: null,
-    directoryTarget: "terminal"
+    directoryTarget: "terminal",
+    security: null
   };
 
   function t(key, replacements = {}) {
@@ -437,7 +498,19 @@
     runAgentButton: document.getElementById("run-agent-button"),
     stopAgentButton: document.getElementById("stop-agent-button"),
     saveAgentButton: document.getElementById("save-agent-button"),
-    deleteAgentButton: document.getElementById("delete-agent-button")
+    deleteAgentButton: document.getElementById("delete-agent-button"),
+    loginCaptcha: document.getElementById("login-captcha"),
+    securitySettingsButton: document.getElementById("security-settings-button"),
+    securityDialog: document.getElementById("security-dialog"),
+    securityProviderInput: document.getElementById("security-provider-input"),
+    securityKeyFields: document.getElementById("security-key-fields"),
+    securitySiteKeyInput: document.getElementById("security-site-key-input"),
+    securitySecretKeyInput: document.getElementById("security-secret-key-input"),
+    securityMinScoreField: document.getElementById("security-min-score-field"),
+    securityMinScoreInput: document.getElementById("security-min-score-input"),
+    securityMessage: document.getElementById("security-message"),
+    cancelSecurity: document.getElementById("cancel-security"),
+    saveSecurityButton: document.getElementById("save-security-button")
   };
 
   async function api(path, options = {}) {
@@ -454,6 +527,104 @@
       throw new Error(translateErrorData(data));
     }
     return data;
+  }
+
+  const CAPTCHA_SCRIPTS = {
+    recaptcha_v2: "https://www.google.com/recaptcha/api.js",
+    recaptcha_v3: "https://www.google.com/recaptcha/api.js",
+    turnstile: "https://challenges.cloudflare.com/turnstile/v0/api.js"
+  };
+
+  function loadScript(src) {
+    return new Promise((resolve, reject) => {
+      const existing = document.querySelector(`script[src="${src}"]`);
+      if (existing) {
+        resolve();
+        return;
+      }
+      const script = document.createElement("script");
+      script.src = src;
+      script.async = true;
+      script.onload = () => resolve();
+      script.onerror = () => reject(new Error(`Failed to load ${src}`));
+      document.head.append(script);
+    });
+  }
+
+  function waitFor(check, timeout = 8000, interval = 100) {
+    return new Promise((resolve, reject) => {
+      const start = Date.now();
+      const tick = () => {
+        if (check()) {
+          resolve();
+          return;
+        }
+        if (Date.now() - start > timeout) {
+          reject(new Error("Timed out waiting for captcha script"));
+          return;
+        }
+        setTimeout(tick, interval);
+      };
+      tick();
+    });
+  }
+
+  async function setupLoginCaptcha(security) {
+    state.security = security || { captchaProvider: "none", siteKey: "" };
+    const provider = state.security.captchaProvider;
+    els.loginCaptcha.replaceChildren();
+
+    if (provider === "none" || !state.security.siteKey) {
+      els.loginCaptcha.classList.add("hidden");
+      return;
+    }
+
+    els.loginCaptcha.classList.toggle("hidden", provider === "recaptcha_v3");
+
+    try {
+      await loadScript(CAPTCHA_SCRIPTS[provider]);
+    } catch (error) {
+      console.warn(error.message);
+      return;
+    }
+
+    if (provider === "turnstile") {
+      await waitFor(() => window.turnstile?.render);
+      window.turnstile.render(els.loginCaptcha, { sitekey: state.security.siteKey });
+    } else if (provider === "recaptcha_v2") {
+      await waitFor(() => window.grecaptcha?.render);
+      window.grecaptcha.render(els.loginCaptcha, { sitekey: state.security.siteKey });
+    }
+  }
+
+  async function getCaptchaToken() {
+    const provider = state.security?.captchaProvider;
+    if (!provider || provider === "none" || !state.security.siteKey) return "";
+
+    if (provider === "turnstile") {
+      return window.turnstile?.getResponse() || "";
+    }
+    if (provider === "recaptcha_v2") {
+      return window.grecaptcha?.getResponse() || "";
+    }
+    if (provider === "recaptcha_v3") {
+      if (!window.grecaptcha) return "";
+      return new Promise((resolve) => {
+        window.grecaptcha.ready(() => {
+          window.grecaptcha
+            .execute(state.security.siteKey, { action: "login" })
+            .then(resolve)
+            .catch(() => resolve(""));
+        });
+      });
+    }
+    return "";
+  }
+
+  function resetCaptcha() {
+    const provider = state.security?.captchaProvider;
+    if (provider === "turnstile") window.turnstile?.reset();
+    else if (provider === "recaptcha_v2") window.grecaptcha?.reset();
   }
 
   function showAuth(mode) {
@@ -477,6 +648,7 @@
     els.signedInUser.textContent = status.user ? `@${status.user.username}` : "";
     els.cwdInput.value = status.defaults?.cwd || "";
     renderOpencode(status.opencode);
+    if (!status.authenticated) setupLoginCaptcha(status.security).catch((error) => console.warn(error.message));
   }
 
   function renderOpencode(opencode) {
@@ -1097,15 +1269,18 @@
     setAuthMessage("");
     const form = new FormData(els.loginForm);
     try {
+      const captchaToken = await getCaptchaToken();
       await api("/api/login", {
         method: "POST",
         body: {
           username: form.get("username"),
-          password: form.get("password")
+          password: form.get("password"),
+          captchaToken
         }
       });
       await boot();
     } catch (error) {
+      resetCaptcha();
       setAuthMessage(error.message);
     }
   });
@@ -1119,7 +1294,7 @@
     if (state.socket) state.socket.disconnect();
     state.sessions = [];
     state.activeId = null;
-    showAuth("login");
+    await boot();
   });
 
   els.terminalsModeButton.addEventListener("click", () => setMode("terminals"));
@@ -1251,6 +1426,60 @@
     const session = currentSession();
     if (!session) return;
     requestCloseSession(session.id);
+  });
+
+  function updateSecurityFieldVisibility() {
+    const provider = els.securityProviderInput.value;
+    els.securityKeyFields.classList.toggle("hidden", provider === "none");
+    els.securityMinScoreField.classList.toggle("hidden", provider !== "recaptcha_v3");
+  }
+
+  async function openSecurityDialog() {
+    els.securityMessage.textContent = "";
+    els.securityMessage.classList.remove("success");
+    els.securityDialog.showModal();
+    try {
+      const data = await api("/api/security");
+      els.securityProviderInput.value = data.security.captchaProvider;
+      els.securitySiteKeyInput.value = data.security.siteKey || "";
+      els.securitySecretKeyInput.value = data.security.secretKey || "";
+      els.securityMinScoreInput.value = data.security.recaptchaMinScore ?? 0.5;
+      updateSecurityFieldVisibility();
+    } catch (error) {
+      alert(error.message || t("unableLoadSecurity"));
+      els.securityDialog.close();
+    }
+  }
+
+  els.securitySettingsButton.addEventListener("click", () => {
+    openSecurityDialog();
+  });
+
+  els.securityProviderInput.addEventListener("change", updateSecurityFieldVisibility);
+
+  els.cancelSecurity.addEventListener("click", () => {
+    els.securityDialog.close();
+  });
+
+  els.saveSecurityButton.addEventListener("click", async () => {
+    els.securityMessage.textContent = "";
+    els.securityMessage.classList.remove("success");
+    try {
+      const data = await api("/api/security", {
+        method: "PUT",
+        body: {
+          captchaProvider: els.securityProviderInput.value,
+          siteKey: els.securitySiteKeyInput.value,
+          secretKey: els.securitySecretKeyInput.value,
+          recaptchaMinScore: Number(els.securityMinScoreInput.value) || 0.5
+        }
+      });
+      state.status.security = { captchaProvider: data.security.captchaProvider, siteKey: data.security.siteKey };
+      els.securityMessage.classList.add("success");
+      els.securityMessage.textContent = t("securitySaved");
+    } catch (error) {
+      els.securityMessage.textContent = error.message || t("unableSaveSecurity");
+    }
   });
 
   els.cancelCloseSession.addEventListener("click", () => {
