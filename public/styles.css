@@ -210,7 +210,8 @@ button {
 .danger-action,
 .ghost-action,
 .auth-form button,
-.dialog-form menu button {
+.dialog-form menu button,
+.settings-dialog-menu button {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -229,7 +230,8 @@ button {
 .danger-action:hover,
 .ghost-action:hover,
 .auth-form button:hover,
-.dialog-form menu button:hover {
+.dialog-form menu button:hover,
+.settings-dialog-menu button:hover {
   filter: brightness(1.08);
 }
 
@@ -238,7 +240,8 @@ button {
 .danger-action:active,
 .ghost-action:active,
 .auth-form button:active,
-.dialog-form menu button:active {
+.dialog-form menu button:active,
+.settings-dialog-menu button:active {
   filter: brightness(0.96);
 }
 
@@ -304,7 +307,8 @@ button:disabled {
   height: 22px;
 }
 
-.dialog-form menu button[type="button"]:not(.danger-action) {
+.dialog-form menu button[type="button"]:not(.danger-action),
+.settings-dialog-menu button {
   background: transparent;
   color: var(--md-primary);
 }
