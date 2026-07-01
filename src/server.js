@@ -5,6 +5,7 @@ const http = require("http");
 const session = require("express-session");
 const FileStore = require("session-file-store")(session);
 const { Server } = require("socket.io");
+const { AgentManager } = require("./agent-manager");
 const { attachAuthRoutes, publicUser, requireAuth } = require("./auth");
 const { FilesystemBrowser } = require("./filesystem");
 const { OpencodeInstaller } = require("./opencode");
@@ -37,6 +38,11 @@ async function main() {
   });
   const terminals = new TerminalManager();
   const filesystem = new FilesystemBrowser({
+    defaultCwd: terminals.defaultCwd,
+    workspaceRoot: terminals.workspaceRoot
+  });
+  const agents = new AgentManager({
+    store,
     defaultCwd: terminals.defaultCwd,
     workspaceRoot: terminals.workspaceRoot
   });
@@ -91,6 +97,71 @@ async function main() {
 
   app.get("/api/sessions", requireAuth, (req, res) => {
     res.json({ sessions: terminals.listSessions() });
+  });
+
+  app.get("/api/agents", requireAuth, async (req, res, next) => {
+    try {
+      res.json({
+        agents: await agents.listAgents(),
+        runs: store.getAgentRuns(null, 50)
+      });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.post("/api/agents", requireAuth, async (req, res, next) => {
+    try {
+      const agent = await agents.createAgent(req.body || {});
+      res.status(201).json({ agent });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.put("/api/agents/:id", requireAuth, async (req, res, next) => {
+    try {
+      const agent = await agents.updateAgent(req.params.id, req.body || {});
+      if (!agent) {
+        res.status(404).json({ code: "agent_not_found", error: "Agent not found." });
+        return;
+      }
+      res.json({ agent });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.delete("/api/agents/:id", requireAuth, async (req, res, next) => {
+    try {
+      const removed = await agents.removeAgent(req.params.id);
+      if (!removed) {
+        res.status(404).json({ code: "agent_not_found", error: "Agent not found." });
+        return;
+      }
+      res.json({ ok: true });
+    } catch (error) {
+      next(error);
+    }
+  });
+
+  app.get("/api/agents/:id/runs", requireAuth, (req, res) => {
+    res.json({ runs: store.getAgentRuns(req.params.id, 50) });
+  });
+
+  app.post("/api/agents/:id/run", requireAuth, async (req, res, next) => {
+    try {
+      agents.runAgent(req.params.id, "manual").catch((error) => {
+        console.error(`Manual agent run failed for ${req.params.id}:`, error);
+      });
+      res.json({ ok: true });
+    } catch (error) {
+      if (error.code) {
+        res.status(400).json({ code: error.code, error: error.message });
+        return;
+      }
+      next(error);
+    }
   });
 
   app.get("/api/fs/directories", requireAuth, async (req, res, next) => {
@@ -174,6 +245,7 @@ async function main() {
   io.on("connection", (socket) => {
     socket.emit("sessions:list", terminals.listSessions());
     socket.emit("opencode:status", installer.snapshot());
+    socket.emit("agents:list", store.getAgents());
 
     socket.on("session:create", async (payload = {}, ack) => {
       try {
@@ -241,10 +313,20 @@ async function main() {
   installer.on("change", (status) => {
     io.emit("opencode:status", status);
   });
+  agents.on("agents:changed", (list) => {
+    io.emit("agents:list", list);
+  });
+  agents.on("runs:changed", (payload) => {
+    io.emit("agents:runs", payload);
+  });
 
   app.use((error, req, res, next) => {
     if (res.headersSent) {
       next(error);
+      return;
+    }
+    if (error.code && (String(error.code).startsWith("agent_") || String(error.code).startsWith("path_"))) {
+      res.status(400).json({ code: error.code, error: error.message });
       return;
     }
     console.error(error);
@@ -282,8 +364,11 @@ async function main() {
       });
   }
 
+  agents.start();
+
   const shutdown = () => {
     shuttingDown = true;
+    agents.stop();
     terminals.killAll();
     server.close(() => process.exit(0));
     setTimeout(() => process.exit(1), 5000).unref();

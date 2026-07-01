@@ -17,6 +17,35 @@ Then open [http://localhost:8734](http://localhost:8734), create the first usern
 
 The New Terminal dialog lets you type a working directory or browse server folders with the built-in folder picker.
 
+## Agents
+
+OpenForge has two work areas:
+
+- **Terminals**: interactive long-running OpenCode PTYs.
+- **Agents**: saved background jobs that run OpenCode on a schedule.
+
+Agents store a name, description, working directory, prompt, enabled flag, weekly run days, and run time. The default new-agent schedule is Monday, Wednesday, and Friday at 09:00, which fits a "three articles a week" SEO workflow.
+
+By default, an agent run executes:
+
+```bash
+opencode run --auto --dir "<agent working directory>" "<agent prompt>"
+```
+
+Run history is stored in `OPENFORGE_DATA_DIR`, including status, timestamps, stdout, stderr, and the command used. Agents run in the background while the OpenForge server is running, even if no browser tab is open.
+
+You can override the agent command:
+
+```bash
+OPENFORGE_AGENT_COMMAND=opencode
+OPENFORGE_AGENT_ARGS='run --auto --dir {cwd} {prompt}'
+```
+
+Placeholders:
+
+- `{cwd}` becomes the agent working directory.
+- `{prompt}` becomes the agent prompt.
+
 For app-only development without installing OpenCode:
 
 ```bash
@@ -171,7 +200,7 @@ sudo systemctl enable --now openforge
 sudo systemctl status openforge
 ```
 
-Terminal sessions survive browser disconnects and page refreshes. They live as long as the OpenForge server process is alive; after a server restart or reboot, create new terminal sessions.
+Terminal sessions survive browser disconnects and page refreshes. Saved terminal entries are also restored after an OpenForge restart or host reboot, as long as OpenForge is started again.
 
 ## Session Persistence
 

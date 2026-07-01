@@ -55,13 +55,22 @@
               <span id="opencode-status" class="status-pill" data-i18n="checking">Checking</span>
             </div>
           </div>
+          <div class="mode-tabs" role="tablist">
+            <button id="terminals-mode-button" type="button" class="mode-tab active" data-mode="terminals" data-i18n="terminals">Terminals</button>
+            <button id="agents-mode-button" type="button" class="mode-tab" data-mode="agents" data-i18n="agents">Agents</button>
+          </div>
           <button id="new-terminal-button" class="primary-action" type="button" title="New terminal" data-i18n-title="newTerminalTitle">
             <span aria-hidden="true">+</span>
             <span data-i18n="newTerminal">New</span>
           </button>
+          <button id="new-agent-button" class="primary-action hidden" type="button" title="New agent" data-i18n-title="newAgentTitle">
+            <span aria-hidden="true">+</span>
+            <span data-i18n="newAgent">New Agent</span>
+          </button>
         </div>
 
         <nav id="session-list" class="session-list" aria-label="Terminals" data-i18n-aria-label="terminals"></nav>
+        <nav id="agent-list" class="session-list hidden" aria-label="Agents" data-i18n-aria-label="agents"></nav>
 
         <div class="sidebar-bottom">
           <button id="install-button" class="secondary-action hidden" type="button" data-i18n="installOpenCode">Install OpenCode</button>
@@ -70,7 +79,7 @@
         </div>
       </aside>
 
-      <section class="workspace">
+      <section id="terminal-workspace" class="workspace">
         <header class="workspace-header">
           <div>
             <h2 id="terminal-title" data-i18n="noTerminal">No Terminal</h2>
@@ -85,6 +94,69 @@
         <div id="terminal-wrap" class="terminal-wrap">
           <div id="empty-state" class="empty-state" data-i18n="noTerminals">No terminals</div>
           <div id="terminal" class="terminal"></div>
+        </div>
+      </section>
+
+      <section id="agents-workspace" class="workspace hidden">
+        <header class="workspace-header">
+          <div>
+            <h2 id="agent-title" data-i18n="agents">Agents</h2>
+            <p id="agent-subtitle"></p>
+          </div>
+          <div class="header-actions">
+            <button id="run-agent-button" class="secondary-action" type="button" data-i18n="runNow">Run Now</button>
+            <button id="save-agent-button" class="primary-action" type="button" data-i18n="save">Save</button>
+            <button id="delete-agent-button" class="danger-action" type="button" data-i18n="delete">Delete</button>
+          </div>
+        </header>
+
+        <div class="agent-workspace-body">
+          <form id="agent-form" class="agent-form">
+            <label>
+              <span data-i18n="name">Name</span>
+              <input id="agent-name-input" name="name" maxlength="80" />
+            </label>
+            <label>
+              <span data-i18n="description">Description</span>
+              <input id="agent-description-input" name="description" maxlength="400" />
+            </label>
+            <label>
+              <span data-i18n="workingDirectory">Working directory</span>
+              <span class="path-picker-row">
+                <input id="agent-cwd-input" name="cwd" />
+                <button id="browse-agent-cwd-button" type="button" class="secondary-action" data-i18n="browse">Browse</button>
+              </span>
+            </label>
+            <label>
+              <span data-i18n="prompt">Prompt</span>
+              <textarea id="agent-prompt-input" name="prompt" rows="9"></textarea>
+            </label>
+            <label class="checkbox-row">
+              <input id="agent-enabled-input" name="enabled" type="checkbox" />
+              <span data-i18n="enabled">Enabled</span>
+            </label>
+            <div class="schedule-grid">
+              <label>
+                <span data-i18n="runTime">Run time</span>
+                <input id="agent-time-input" name="time" type="time" value="09:00" />
+              </label>
+              <fieldset class="day-picker">
+                <legend data-i18n="runDays">Run days</legend>
+                <label><input type="checkbox" name="days" value="1" /> <span data-i18n="mondayShort">Mon</span></label>
+                <label><input type="checkbox" name="days" value="2" /> <span data-i18n="tuesdayShort">Tue</span></label>
+                <label><input type="checkbox" name="days" value="3" /> <span data-i18n="wednesdayShort">Wed</span></label>
+                <label><input type="checkbox" name="days" value="4" /> <span data-i18n="thursdayShort">Thu</span></label>
+                <label><input type="checkbox" name="days" value="5" /> <span data-i18n="fridayShort">Fri</span></label>
+                <label><input type="checkbox" name="days" value="6" /> <span data-i18n="saturdayShort">Sat</span></label>
+                <label><input type="checkbox" name="days" value="0" /> <span data-i18n="sundayShort">Sun</span></label>
+              </fieldset>
+            </div>
+          </form>
+
+          <section class="agent-history">
+            <h3 data-i18n="runHistory">Run History</h3>
+            <div id="agent-runs" class="run-list"></div>
+          </section>
         </div>
       </section>
     </main>

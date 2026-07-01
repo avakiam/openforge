@@ -13,7 +13,9 @@ function createDefaultState() {
     createdAt: new Date().toISOString(),
     cookieSecret: crypto.randomBytes(32).toString("hex"),
     users: [],
-    terminalSessions: []
+    terminalSessions: [],
+    agents: [],
+    agentRuns: []
   };
 }
 
@@ -43,6 +45,14 @@ class Store {
     }
     if (!Array.isArray(this.state.terminalSessions)) {
       this.state.terminalSessions = [];
+      changed = true;
+    }
+    if (!Array.isArray(this.state.agents)) {
+      this.state.agents = [];
+      changed = true;
+    }
+    if (!Array.isArray(this.state.agentRuns)) {
+      this.state.agentRuns = [];
       changed = true;
     }
 
@@ -119,6 +129,81 @@ class Store {
     if (nextSessions.length === this.state.terminalSessions.length) return;
     this.state.terminalSessions = nextSessions;
     await this.save();
+  }
+
+  getAgents() {
+    return this.state.agents.map((agent) => ({ ...agent, schedule: { ...agent.schedule } }));
+  }
+
+  getAgent(id) {
+    const agent = this.state.agents.find((item) => item.id === id);
+    return agent ? { ...agent, schedule: { ...agent.schedule } } : null;
+  }
+
+  async addAgent(agent) {
+    this.state.agents.push(agent);
+    await this.save();
+    return this.getAgent(agent.id);
+  }
+
+  async updateAgent(id, patch) {
+    const index = this.state.agents.findIndex((agent) => agent.id === id);
+    if (index < 0) return null;
+    this.state.agents[index] = {
+      ...this.state.agents[index],
+      ...patch,
+      schedule: {
+        ...this.state.agents[index].schedule,
+        ...(patch.schedule || {})
+      },
+      updatedAt: new Date().toISOString()
+    };
+    await this.save();
+    return this.getAgent(id);
+  }
+
+  async removeAgent(id) {
+    const nextAgents = this.state.agents.filter((agent) => agent.id !== id);
+    if (nextAgents.length === this.state.agents.length) return false;
+    this.state.agents = nextAgents;
+    this.state.agentRuns = this.state.agentRuns.filter((run) => run.agentId !== id);
+    await this.save();
+    return true;
+  }
+
+  getAgentRuns(agentId, limit = 25) {
+    return this.state.agentRuns
+      .filter((run) => !agentId || run.agentId === agentId)
+      .sort((a, b) => String(b.startedAt).localeCompare(String(a.startedAt)))
+      .slice(0, limit)
+      .map((run) => ({ ...run }));
+  }
+
+  async addAgentRun(run) {
+    this.state.agentRuns.push(run);
+    this.pruneAgentRuns();
+    await this.save();
+    return { ...run };
+  }
+
+  async updateAgentRun(id, patch) {
+    const index = this.state.agentRuns.findIndex((run) => run.id === id);
+    if (index < 0) return null;
+    this.state.agentRuns[index] = {
+      ...this.state.agentRuns[index],
+      ...patch
+    };
+    this.pruneAgentRuns();
+    await this.save();
+    return { ...this.state.agentRuns[index] };
+  }
+
+  pruneAgentRuns() {
+    const maxRuns = Number(process.env.OPENFORGE_MAX_AGENT_RUNS || 200);
+    if (this.state.agentRuns.length <= maxRuns) return;
+    this.state.agentRuns = this.state.agentRuns
+      .sort((a, b) => String(b.startedAt).localeCompare(String(a.startedAt)))
+      .slice(0, maxRuns);
   }
 }
 

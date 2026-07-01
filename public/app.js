@@ -11,6 +11,34 @@
       terminals: "Terminals",
       installOpenCode: "Install OpenCode",
       signOut: "Sign Out",
+      agents: "Agents",
+      newAgent: "New Agent",
+      newAgentTitle: "New agent",
+      runNow: "Run Now",
+      save: "Save",
+      delete: "Delete",
+      description: "Description",
+      prompt: "Prompt",
+      enabled: "Enabled",
+      runTime: "Run time",
+      runDays: "Run days",
+      runHistory: "Run History",
+      noAgentSelected: "No agent selected",
+      noRuns: "No runs yet",
+      nextRun: "Next run",
+      lastRun: "Last run",
+      idle: "idle",
+      success: "success",
+      failed: "failed",
+      manual: "manual",
+      schedule: "schedule",
+      mondayShort: "Mon",
+      tuesdayShort: "Tue",
+      wednesdayShort: "Wed",
+      thursdayShort: "Thu",
+      fridayShort: "Fri",
+      saturdayShort: "Sat",
+      sundayShort: "Sun",
       noTerminal: "No Terminal",
       fit: "Fit",
       fitTerminal: "Fit terminal",
@@ -43,6 +71,8 @@
       unableAttachTerminal: "Unable to attach terminal.",
       unableCreateTerminal: "Unable to create terminal.",
       unableCloseTerminal: "Unable to close terminal.",
+      unableSaveAgent: "Unable to save agent.",
+      unableRunAgent: "Unable to run agent.",
       error_auth_required: "Authentication required.",
       error_setup_completed: "Setup has already been completed.",
       error_invalid_username:
@@ -53,7 +83,10 @@
       error_path_not_found: "Path not found.",
       error_path_access_denied: "Path access denied.",
       error_path_outside_workspace: "Path must stay inside the configured workspace.",
-      error_path_not_directory: "Path is not a directory."
+      error_path_not_directory: "Path is not a directory.",
+      error_agent_not_found: "Agent not found.",
+      error_agent_prompt_required: "Agent prompt is required.",
+      error_agent_already_running: "Agent is already running."
     },
     es: {
       firstAdmin: "Primer administrador",
@@ -66,6 +99,34 @@
       terminals: "Terminales",
       installOpenCode: "Instalar OpenCode",
       signOut: "Cerrar sesión",
+      agents: "Agentes",
+      newAgent: "Nuevo agente",
+      newAgentTitle: "Nuevo agente",
+      runNow: "Ejecutar ahora",
+      save: "Guardar",
+      delete: "Eliminar",
+      description: "Descripción",
+      prompt: "Prompt",
+      enabled: "Activado",
+      runTime: "Hora",
+      runDays: "Días",
+      runHistory: "Historial",
+      noAgentSelected: "Ningún agente seleccionado",
+      noRuns: "Todavía no hay ejecuciones",
+      nextRun: "Próxima ejecución",
+      lastRun: "Última ejecución",
+      idle: "en espera",
+      success: "correcta",
+      failed: "fallida",
+      manual: "manual",
+      schedule: "programada",
+      mondayShort: "Lun",
+      tuesdayShort: "Mar",
+      wednesdayShort: "Mié",
+      thursdayShort: "Jue",
+      fridayShort: "Vie",
+      saturdayShort: "Sáb",
+      sundayShort: "Dom",
       noTerminal: "Sin terminal",
       fit: "Ajustar",
       fitTerminal: "Ajustar terminal",
@@ -98,6 +159,8 @@
       unableAttachTerminal: "No se pudo conectar la terminal.",
       unableCreateTerminal: "No se pudo crear la terminal.",
       unableCloseTerminal: "No se pudo cerrar la terminal.",
+      unableSaveAgent: "No se pudo guardar el agente.",
+      unableRunAgent: "No se pudo ejecutar el agente.",
       error_auth_required: "Debes iniciar sesión.",
       error_setup_completed: "La configuración inicial ya se completó.",
       error_invalid_username:
@@ -108,7 +171,10 @@
       error_path_not_found: "Ruta no encontrada.",
       error_path_access_denied: "Acceso denegado a la ruta.",
       error_path_outside_workspace: "La ruta debe estar dentro del espacio de trabajo configurado.",
-      error_path_not_directory: "La ruta no es un directorio."
+      error_path_not_directory: "La ruta no es un directorio.",
+      error_agent_not_found: "Agente no encontrado.",
+      error_agent_prompt_required: "El prompt del agente es obligatorio.",
+      error_agent_already_running: "El agente ya se está ejecutando."
     },
     ca: {
       firstAdmin: "Primer administrador",
@@ -121,6 +187,34 @@
       terminals: "Terminals",
       installOpenCode: "Instal·la OpenCode",
       signOut: "Tanca sessió",
+      agents: "Agents",
+      newAgent: "Agent nou",
+      newAgentTitle: "Agent nou",
+      runNow: "Executa ara",
+      save: "Desa",
+      delete: "Elimina",
+      description: "Descripció",
+      prompt: "Prompt",
+      enabled: "Activat",
+      runTime: "Hora",
+      runDays: "Dies",
+      runHistory: "Historial",
+      noAgentSelected: "Cap agent seleccionat",
+      noRuns: "Encara no hi ha execucions",
+      nextRun: "Proper execució",
+      lastRun: "Última execució",
+      idle: "en espera",
+      success: "correcta",
+      failed: "fallida",
+      manual: "manual",
+      schedule: "programada",
+      mondayShort: "Dl",
+      tuesdayShort: "Dt",
+      wednesdayShort: "Dc",
+      thursdayShort: "Dj",
+      fridayShort: "Dv",
+      saturdayShort: "Ds",
+      sundayShort: "Dg",
       noTerminal: "Cap terminal",
       fit: "Ajusta",
       fitTerminal: "Ajusta la terminal",
@@ -153,6 +247,8 @@
       unableAttachTerminal: "No s'ha pogut connectar la terminal.",
       unableCreateTerminal: "No s'ha pogut crear la terminal.",
       unableCloseTerminal: "No s'ha pogut tancar la terminal.",
+      unableSaveAgent: "No s'ha pogut desar l'agent.",
+      unableRunAgent: "No s'ha pogut executar l'agent.",
       error_auth_required: "Cal iniciar sessió.",
       error_setup_completed: "La configuració inicial ja s'ha completat.",
       error_invalid_username:
@@ -163,7 +259,10 @@
       error_path_not_found: "No s'ha trobat la ruta.",
       error_path_access_denied: "Accés denegat a la ruta.",
       error_path_outside_workspace: "La ruta ha d'estar dins de l'espai de treball configurat.",
-      error_path_not_directory: "La ruta no és un directori."
+      error_path_not_directory: "La ruta no és un directori.",
+      error_agent_not_found: "No s'ha trobat l'agent.",
+      error_agent_prompt_required: "El prompt de l'agent és obligatori.",
+      error_agent_already_running: "L'agent ja s'està executant."
     }
   };
 
@@ -181,12 +280,17 @@
     status: null,
     socket: null,
     sessions: [],
+    agents: [],
+    agentRuns: [],
     activeId: null,
+    activeAgentId: null,
+    mode: "terminals",
     terminal: null,
     fitAddon: null,
     resizeObserver: null,
     pendingCloseId: null,
-    directoryPath: null
+    directoryPath: null,
+    directoryTarget: "terminal"
   };
 
   function t(key, replacements = {}) {
@@ -238,14 +342,20 @@
     setupForm: document.getElementById("setup-form"),
     loginForm: document.getElementById("login-form"),
     authMessage: document.getElementById("auth-message"),
+    terminalsModeButton: document.getElementById("terminals-mode-button"),
+    agentsModeButton: document.getElementById("agents-mode-button"),
     newButton: document.getElementById("new-terminal-button"),
+    newAgentButton: document.getElementById("new-agent-button"),
     sessionList: document.getElementById("session-list"),
+    agentList: document.getElementById("agent-list"),
     opencodeStatus: document.getElementById("opencode-status"),
     installButton: document.getElementById("install-button"),
     signedInUser: document.getElementById("signed-in-user"),
     logoutButton: document.getElementById("logout-button"),
     terminalTitle: document.getElementById("terminal-title"),
     terminalSubtitle: document.getElementById("terminal-subtitle"),
+    terminalWorkspace: document.getElementById("terminal-workspace"),
+    agentsWorkspace: document.getElementById("agents-workspace"),
     terminalWrap: document.getElementById("terminal-wrap"),
     terminal: document.getElementById("terminal"),
     emptyState: document.getElementById("empty-state"),
@@ -266,7 +376,21 @@
     confirmCloseDialog: document.getElementById("confirm-close-dialog"),
     confirmCloseBody: document.getElementById("confirm-close-body"),
     cancelCloseSession: document.getElementById("cancel-close-session"),
-    confirmCloseSession: document.getElementById("confirm-close-session")
+    confirmCloseSession: document.getElementById("confirm-close-session"),
+    agentTitle: document.getElementById("agent-title"),
+    agentSubtitle: document.getElementById("agent-subtitle"),
+    agentForm: document.getElementById("agent-form"),
+    agentNameInput: document.getElementById("agent-name-input"),
+    agentDescriptionInput: document.getElementById("agent-description-input"),
+    agentCwdInput: document.getElementById("agent-cwd-input"),
+    browseAgentCwdButton: document.getElementById("browse-agent-cwd-button"),
+    agentPromptInput: document.getElementById("agent-prompt-input"),
+    agentEnabledInput: document.getElementById("agent-enabled-input"),
+    agentTimeInput: document.getElementById("agent-time-input"),
+    agentRuns: document.getElementById("agent-runs"),
+    runAgentButton: document.getElementById("run-agent-button"),
+    saveAgentButton: document.getElementById("save-agent-button"),
+    deleteAgentButton: document.getElementById("delete-agent-button")
   };
 
   async function api(path, options = {}) {
@@ -352,6 +476,37 @@
       }
     });
     state.socket.on("opencode:status", renderOpencode);
+    state.socket.on("agents:list", (agents) => {
+      state.agents = agents;
+      renderAgents();
+      if (!state.activeAgentId && agents.length) {
+        selectAgent(agents[0].id).catch((error) => console.warn(error.message));
+      }
+      if (state.activeAgentId && !agents.some((agent) => agent.id === state.activeAgentId)) {
+        selectAgent(agents[0]?.id || null).catch((error) => console.warn(error.message));
+      }
+    });
+    state.socket.on("agents:runs", ({ agentId, runs }) => {
+      if (agentId === state.activeAgentId) {
+        state.agentRuns = runs;
+        renderAgentRuns();
+      }
+    });
+  }
+
+  function setMode(mode) {
+    state.mode = mode;
+    const isAgents = mode === "agents";
+    els.terminalsModeButton.classList.toggle("active", !isAgents);
+    els.agentsModeButton.classList.toggle("active", isAgents);
+    els.newButton.classList.toggle("hidden", isAgents);
+    els.newAgentButton.classList.toggle("hidden", !isAgents);
+    els.sessionList.classList.toggle("hidden", isAgents);
+    els.agentList.classList.toggle("hidden", !isAgents);
+    els.terminalWorkspace.classList.toggle("hidden", isAgents);
+    els.agentsWorkspace.classList.toggle("hidden", !isAgents);
+    if (isAgents) loadAgents().catch((error) => alert(error.message));
+    else fitTerminal();
   }
 
   function renderSessions() {
@@ -387,6 +542,173 @@
 
       row.append(button, closeButton);
       els.sessionList.append(row);
+    }
+  }
+
+  async function loadAgents() {
+    const data = await api("/api/agents");
+    state.agents = data.agents || [];
+    state.agentRuns = state.activeAgentId
+      ? (data.runs || []).filter((run) => run.agentId === state.activeAgentId)
+      : [];
+    renderAgents();
+    if (!state.activeAgentId && state.agents.length) await selectAgent(state.agents[0].id);
+    else renderAgentForm();
+  }
+
+  function renderAgents() {
+    els.agentList.replaceChildren();
+
+    for (const agent of state.agents) {
+      const row = document.createElement("div");
+      row.className = `session-row agent-row${agent.id === state.activeAgentId ? " active" : ""}`;
+
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "session-item";
+
+      const title = document.createElement("strong");
+      title.textContent = agent.name;
+      const detail = document.createElement("span");
+      detail.textContent = agent.status ? t(agent.status) : t("idle");
+
+      button.append(title, detail);
+      button.addEventListener("click", () => selectAgent(agent.id));
+      row.append(button);
+      els.agentList.append(row);
+    }
+  }
+
+  function currentAgent() {
+    return state.agents.find((agent) => agent.id === state.activeAgentId) || null;
+  }
+
+  async function selectAgent(id) {
+    state.activeAgentId = id;
+    renderAgents();
+    renderAgentForm();
+    if (!id) {
+      state.agentRuns = [];
+      renderAgentRuns();
+      return;
+    }
+    const data = await api(`/api/agents/${encodeURIComponent(id)}/runs`);
+    state.agentRuns = data.runs || [];
+    renderAgentRuns();
+  }
+
+  function newAgentDraft() {
+    state.activeAgentId = "__new";
+    state.agentRuns = [];
+    renderAgents();
+    renderAgentForm({
+      id: "__new",
+      name: t("newAgent"),
+      description: "",
+      cwd: state.status?.defaults?.cwd || "",
+      prompt: "",
+      enabled: false,
+      schedule: { days: [1, 3, 5], time: "09:00" },
+      status: "idle"
+    });
+    renderAgentRuns();
+  }
+
+  function renderAgentForm(agent = currentAgent()) {
+    const hasAgent = Boolean(agent);
+    els.agentForm.classList.toggle("hidden", !hasAgent);
+    els.runAgentButton.disabled = !hasAgent || agent.id === "__new";
+    els.saveAgentButton.disabled = !hasAgent;
+    els.deleteAgentButton.disabled = !hasAgent || agent.id === "__new";
+
+    if (!hasAgent) {
+      els.agentTitle.textContent = t("noAgentSelected");
+      els.agentSubtitle.textContent = "";
+      return;
+    }
+
+    els.agentTitle.textContent = agent.name || t("newAgent");
+    els.agentSubtitle.textContent = [
+      agent.nextRunAt ? `${t("nextRun")}: ${formatDate(agent.nextRunAt)}` : null,
+      agent.lastRunAt ? `${t("lastRun")}: ${formatDate(agent.lastRunAt)}` : null
+    ]
+      .filter(Boolean)
+      .join(" | ");
+    els.agentNameInput.value = agent.name || "";
+    els.agentDescriptionInput.value = agent.description || "";
+    els.agentCwdInput.value = agent.cwd || state.status?.defaults?.cwd || "";
+    els.agentPromptInput.value = agent.prompt || "";
+    els.agentEnabledInput.checked = Boolean(agent.enabled);
+    els.agentTimeInput.value = agent.schedule?.time || "09:00";
+    const days = new Set((agent.schedule?.days || []).map(String));
+    for (const input of els.agentForm.querySelectorAll('input[name="days"]')) {
+      input.checked = days.has(input.value);
+    }
+  }
+
+  function formatDate(value) {
+    if (!value) return "";
+    return new Intl.DateTimeFormat(state.language, {
+      dateStyle: "short",
+      timeStyle: "short"
+    }).format(new Date(value));
+  }
+
+  function collectAgentForm() {
+    return {
+      name: els.agentNameInput.value,
+      description: els.agentDescriptionInput.value,
+      cwd: els.agentCwdInput.value,
+      prompt: els.agentPromptInput.value,
+      enabled: els.agentEnabledInput.checked,
+      schedule: {
+        time: els.agentTimeInput.value || "09:00",
+        days: [...els.agentForm.querySelectorAll('input[name="days"]:checked')].map((input) =>
+          Number(input.value)
+        )
+      }
+    };
+  }
+
+  async function saveAgent() {
+    const payload = collectAgentForm();
+    const isNew = state.activeAgentId === "__new";
+    const response = isNew
+      ? await api("/api/agents", { method: "POST", body: payload })
+      : await api(`/api/agents/${encodeURIComponent(state.activeAgentId)}`, { method: "PUT", body: payload });
+    await loadAgents();
+    await selectAgent(response.agent.id);
+  }
+
+  function renderAgentRuns() {
+    els.agentRuns.replaceChildren();
+    if (!state.agentRuns.length) {
+      const empty = document.createElement("div");
+      empty.className = "directory-empty";
+      empty.textContent = t("noRuns");
+      els.agentRuns.append(empty);
+      return;
+    }
+
+    for (const run of state.agentRuns) {
+      const item = document.createElement("article");
+      item.className = "run-item";
+
+      const header = document.createElement("header");
+      const meta = document.createElement("span");
+      meta.textContent = `${formatDate(run.startedAt)} | ${t(run.trigger || "manual")}`;
+      const status = document.createElement("span");
+      status.className = `run-status ${run.status}`;
+      status.textContent = t(run.status || "idle");
+      header.append(meta, status);
+
+      const output = document.createElement("pre");
+      output.className = "run-output";
+      output.textContent = [run.stdout, run.stderr, run.error].filter(Boolean).join("\n").trim();
+      if (!output.textContent) output.textContent = run.command ? `${run.command} ${run.args.join(" ")}` : "";
+
+      item.append(header, output);
+      els.agentRuns.append(item);
     }
   }
 
@@ -568,11 +890,13 @@
     }
   }
 
-  async function openDirectoryPicker() {
+  async function openDirectoryPicker(target = "terminal") {
+    state.directoryTarget = target;
+    const input = target === "agent" ? els.agentCwdInput : els.cwdInput;
     setDirectoryLoading();
     els.filesystemDialog.showModal();
     try {
-      await loadDirectory(els.cwdInput.value || state.status?.defaults?.cwd || "");
+      await loadDirectory(input.value || state.status?.defaults?.cwd || "");
     } catch (error) {
       alert(error.message);
       els.filesystemDialog.close();
@@ -646,9 +970,16 @@
     showAuth("login");
   });
 
+  els.terminalsModeButton.addEventListener("click", () => setMode("terminals"));
+  els.agentsModeButton.addEventListener("click", () => setMode("agents"));
+
   els.newButton.addEventListener("click", () => {
     els.dialog.showModal();
     window.setTimeout(() => els.newForm.elements.title.focus(), 0);
+  });
+
+  els.newAgentButton.addEventListener("click", () => {
+    newAgentDraft();
   });
 
   els.cancelNew.addEventListener("click", () => {
@@ -656,7 +987,11 @@
   });
 
   els.browseCwdButton.addEventListener("click", () => {
-    openDirectoryPicker();
+    openDirectoryPicker("terminal");
+  });
+
+  els.browseAgentCwdButton.addEventListener("click", () => {
+    openDirectoryPicker("agent");
   });
 
   els.cancelFilesystem.addEventListener("click", () => {
@@ -674,7 +1009,8 @@
 
   els.selectCwdButton.addEventListener("click", () => {
     if (state.directoryPath) {
-      els.cwdInput.value = state.directoryPath;
+      const input = state.directoryTarget === "agent" ? els.agentCwdInput : els.cwdInput;
+      input.value = state.directoryPath;
     }
     els.filesystemDialog.close();
   });
@@ -708,6 +1044,38 @@
   });
 
   els.fitButton.addEventListener("click", fitTerminal);
+
+  els.saveAgentButton.addEventListener("click", async () => {
+    try {
+      await saveAgent();
+    } catch (error) {
+      alert(error.message || t("unableSaveAgent"));
+    }
+  });
+
+  els.runAgentButton.addEventListener("click", async () => {
+    const agent = currentAgent();
+    if (!agent) return;
+    try {
+      await api(`/api/agents/${encodeURIComponent(agent.id)}/run`, { method: "POST" });
+      await loadAgents();
+      await selectAgent(agent.id);
+    } catch (error) {
+      alert(error.message || t("unableRunAgent"));
+    }
+  });
+
+  els.deleteAgentButton.addEventListener("click", async () => {
+    const agent = currentAgent();
+    if (!agent) return;
+    try {
+      await api(`/api/agents/${encodeURIComponent(agent.id)}`, { method: "DELETE" });
+      state.activeAgentId = null;
+      await loadAgents();
+    } catch (error) {
+      alert(error.message);
+    }
+  });
 
   els.killButton.addEventListener("click", () => {
     const session = currentSession();
