@@ -24,7 +24,9 @@ OpenForge has two work areas:
 - **Terminals**: interactive long-running OpenCode PTYs.
 - **Agents**: saved background jobs that run OpenCode on a schedule.
 
-Agents store a name, description, working directory, prompt, enabled flag, weekly run days, and run time. The default new-agent schedule is Monday, Wednesday, and Friday at 09:00, which fits a "three articles a week" SEO workflow.
+Agents store a name, description, working directory, prompt, model, effort/variant, enabled flag, weekly run days, and run time. The default new-agent schedule is Monday, Wednesday, and Friday at 09:00, which fits a "three articles a week" SEO workflow.
+
+The Model dropdown is populated from `opencode models`, so it only lists providers/models you've actually linked in OpenCode. The Effort dropdown maps to OpenCode's `--variant` flag (provider-specific reasoning effort) and updates to show only the options that model actually supports, sourced from the [models.dev](https://models.dev) catalog. Both are optional — leave them on "Use OpenCode default" to skip the flag entirely.
 
 By default, an agent run executes:
 
@@ -33,6 +35,8 @@ opencode run --auto --dir "<agent working directory>" "<agent prompt>"
 ```
 
 Run history is stored in `OPENFORGE_DATA_DIR`, including status, timestamps, stdout, stderr, and the command used. Agents run in the background while the OpenForge server is running, even if no browser tab is open.
+
+A running agent can be cancelled from the UI with the **Stop** button. Runs are also killed automatically if they exceed `OPENFORGE_AGENT_TIMEOUT_MS`. If the server restarts while a run is in progress, that run is marked as interrupted on the next startup instead of staying stuck as "running" forever.
 
 You can override the agent command:
 
@@ -256,11 +260,14 @@ Environment variables:
 | `OPENFORGE_WORKSPACE_ROOT` | unset | Optional directory boundary for terminal working directories. |
 | `OPENFORGE_OPENCODE_COMMAND` | `opencode` | Command used when creating OpenCode terminals. |
 | `OPENFORGE_OPENCODE_ARGS` | empty | Extra arguments appended to OpenCode. |
+| `OPENFORGE_AGENT_COMMAND` | same as `OPENFORGE_OPENCODE_COMMAND` | Command used when running an agent. |
+| `OPENFORGE_AGENT_ARGS` | `run --auto --dir {cwd} {prompt}` | Overrides the full argument list for agent runs; supports `{cwd}`, `{prompt}`, `{model}`, and `{variant}` placeholders. |
 | `OPENFORGE_AUTO_INSTALL` | `1` | Set to `0` to disable startup install checks. |
 | `OPENFORGE_SKIP_OPENCODE_INSTALL` | unset | Set to `1` to skip installing during development. |
 | `OPENFORGE_OPENCODE_INSTALL_COMMAND` | unset | Custom install command. |
 | `OPENFORGE_COOKIE_SECURE` | auto | Set to `1` when served only over HTTPS. |
 | `OPENFORGE_TRUST_PROXY` | unset | Set to `1` behind a reverse proxy. |
+| `OPENFORGE_AGENT_TIMEOUT_MS` | `1200000` (20 min) | Kills an agent run that exceeds this duration. |
 
 ## Security Notes
 

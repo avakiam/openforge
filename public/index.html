@@ -105,6 +105,7 @@
           </div>
           <div class="header-actions">
             <button id="run-agent-button" class="secondary-action" type="button" data-i18n="runNow">Run Now</button>
+            <button id="stop-agent-button" class="danger-action hidden" type="button" data-i18n="stop">Stop</button>
             <button id="save-agent-button" class="primary-action" type="button" data-i18n="save">Save</button>
             <button id="delete-agent-button" class="danger-action" type="button" data-i18n="delete">Delete</button>
           </div>
@@ -131,6 +132,19 @@
               <span data-i18n="prompt">Prompt</span>
               <textarea id="agent-prompt-input" name="prompt" rows="9"></textarea>
             </label>
+            <div class="schedule-grid">
+              <label>
+                <span data-i18n="model">Model</span>
+                <span class="path-picker-row">
+                  <select id="agent-model-input" name="model"></select>
+                  <button id="refresh-models-button" type="button" class="secondary-action" data-i18n="refresh">Refresh</button>
+                </span>
+              </label>
+              <label>
+                <span data-i18n="effort">Effort level</span>
+                <select id="agent-variant-input" name="variant"></select>
+              </label>
+            </div>
             <label class="checkbox-row">
               <input id="agent-enabled-input" name="enabled" type="checkbox" />
               <span data-i18n="enabled">Enabled</span>

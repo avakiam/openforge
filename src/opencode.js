@@ -1,6 +1,7 @@
 const { EventEmitter } = require("events");
 const { execFile, spawn } = require("child_process");
 const os = require("os");
+const { resolveSpawnTarget } = require("./shell-quote");
 
 function appendBoundedLog(log, chunk) {
   const text = String(chunk || "");
@@ -105,6 +106,69 @@ async function makeInstallPlan() {
   }
 
   throw new Error("OpenCode is missing, and neither curl+bash nor npm were found.");
+}
+
+let modelCatalogCache = null;
+let modelCatalogFetchedAt = 0;
+const MODEL_CATALOG_TTL_MS = 60 * 60 * 1000;
+
+async function fetchModelCatalog() {
+  const now = Date.now();
+  if (modelCatalogCache && now - modelCatalogFetchedAt < MODEL_CATALOG_TTL_MS) {
+    return modelCatalogCache;
+  }
+  const response = await fetch("https://models.dev/api.json", { signal: AbortSignal.timeout(10_000) });
+  if (!response.ok) throw new Error(`models.dev responded with ${response.status}`);
+  const data = await response.json();
+  modelCatalogCache = data;
+  modelCatalogFetchedAt = now;
+  return data;
+}
+
+function runOpencodeModels(args) {
+  const target = resolveSpawnTarget("opencode", args);
+  return new Promise((resolve, reject) => {
+    execFile(target.file, target.args, { windowsHide: true, timeout: 20_000 }, (error, stdout) => {
+      if (error) {
+        reject(new Error(error.message));
+        return;
+      }
+      const models = stdout
+        .split(/\r?\n/)
+        .map((line) => line.trim())
+        .filter((line) => /^[^\s/]+\/[^\s]+$/.test(line));
+      resolve([...new Set(models)]);
+    });
+  });
+}
+
+async function listModels({ refresh } = {}) {
+  const opencodePath = await findCommand("opencode");
+  if (!opencodePath) {
+    const error = new Error("OpenCode is not installed.");
+    error.code = "opencode_not_installed";
+    throw error;
+  }
+
+  const args = ["models"];
+  if (refresh) args.push("--refresh");
+  const ids = await runOpencodeModels(args);
+
+  let catalog = null;
+  try {
+    catalog = await fetchModelCatalog();
+  } catch {
+    catalog = null;
+  }
+
+  return ids.map((id) => {
+    const separatorIndex = id.indexOf("/");
+    const providerId = id.slice(0, separatorIndex);
+    const modelId = id.slice(separatorIndex + 1);
+    const entry = catalog?.[providerId]?.models?.[modelId];
+    const effortOptions = entry?.reasoning_options?.find((option) => option.type === "effort")?.values || [];
+    return { id, reasoning: Boolean(entry?.reasoning), effortOptions };
+  });
 }
 
 class OpencodeInstaller extends EventEmitter {
@@ -225,5 +289,6 @@ class OpencodeInstaller extends EventEmitter {
 
 module.exports = {
   OpencodeInstaller,
-  findCommand
+  findCommand,
+  listModels
 };

@@ -8,7 +8,7 @@ const { Server } = require("socket.io");
 const { AgentManager } = require("./agent-manager");
 const { attachAuthRoutes, publicUser, requireAuth } = require("./auth");
 const { FilesystemBrowser } = require("./filesystem");
-const { OpencodeInstaller } = require("./opencode");
+const { OpencodeInstaller, listModels } = require("./opencode");
 const { Store } = require("./store");
 const { TerminalManager } = require("./terminal-manager");
 
@@ -154,6 +154,28 @@ async function main() {
       agents.runAgent(req.params.id, "manual").catch((error) => {
         console.error(`Manual agent run failed for ${req.params.id}:`, error);
       });
+      res.json({ ok: true });
+    } catch (error) {
+      if (error.code) {
+        res.status(400).json({ code: error.code, error: error.message });
+        return;
+      }
+      next(error);
+    }
+  });
+
+  app.get("/api/opencode/models", requireAuth, async (req, res) => {
+    try {
+      const models = await listModels({ refresh: req.query.refresh === "1" });
+      res.json({ models });
+    } catch (error) {
+      res.status(503).json({ code: error.code || "opencode_models_failed", error: error.message });
+    }
+  });
+
+  app.post("/api/agents/:id/stop", requireAuth, async (req, res, next) => {
+    try {
+      agents.stopAgent(req.params.id);
       res.json({ ok: true });
     } catch (error) {
       if (error.code) {

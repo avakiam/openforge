@@ -15,6 +15,13 @@
       newAgent: "New Agent",
       newAgentTitle: "New agent",
       runNow: "Run Now",
+      stop: "Stop",
+      model: "Model",
+      useDefaultModel: "Use OpenCode default",
+      effort: "Effort level",
+      useDefaultEffort: "Use model default",
+      modelNotListed: "not in OpenCode",
+      refresh: "Refresh",
       save: "Save",
       delete: "Delete",
       description: "Description",
@@ -73,6 +80,7 @@
       unableCloseTerminal: "Unable to close terminal.",
       unableSaveAgent: "Unable to save agent.",
       unableRunAgent: "Unable to run agent.",
+      unableStopAgent: "Unable to stop agent.",
       error_auth_required: "Authentication required.",
       error_setup_completed: "Setup has already been completed.",
       error_invalid_username:
@@ -86,7 +94,8 @@
       error_path_not_directory: "Path is not a directory.",
       error_agent_not_found: "Agent not found.",
       error_agent_prompt_required: "Agent prompt is required.",
-      error_agent_already_running: "Agent is already running."
+      error_agent_already_running: "Agent is already running.",
+      error_agent_not_running: "Agent is not running."
     },
     es: {
       firstAdmin: "Primer administrador",
@@ -103,6 +112,13 @@
       newAgent: "Nuevo agente",
       newAgentTitle: "Nuevo agente",
       runNow: "Ejecutar ahora",
+      stop: "Detener",
+      model: "Modelo",
+      useDefaultModel: "Usar el predeterminado de OpenCode",
+      effort: "Nivel de esfuerzo",
+      useDefaultEffort: "Usar el predeterminado del modelo",
+      modelNotListed: "no está en OpenCode",
+      refresh: "Actualizar",
       save: "Guardar",
       delete: "Eliminar",
       description: "Descripción",
@@ -161,6 +177,7 @@
       unableCloseTerminal: "No se pudo cerrar la terminal.",
       unableSaveAgent: "No se pudo guardar el agente.",
       unableRunAgent: "No se pudo ejecutar el agente.",
+      unableStopAgent: "No se pudo detener el agente.",
       error_auth_required: "Debes iniciar sesión.",
       error_setup_completed: "La configuración inicial ya se completó.",
       error_invalid_username:
@@ -174,7 +191,8 @@
       error_path_not_directory: "La ruta no es un directorio.",
       error_agent_not_found: "Agente no encontrado.",
       error_agent_prompt_required: "El prompt del agente es obligatorio.",
-      error_agent_already_running: "El agente ya se está ejecutando."
+      error_agent_already_running: "El agente ya se está ejecutando.",
+      error_agent_not_running: "El agente no se está ejecutando."
     },
     ca: {
       firstAdmin: "Primer administrador",
@@ -191,6 +209,13 @@
       newAgent: "Agent nou",
       newAgentTitle: "Agent nou",
       runNow: "Executa ara",
+      stop: "Atura",
+      model: "Model",
+      useDefaultModel: "Usa el predeterminat d'OpenCode",
+      effort: "Nivell d'esforç",
+      useDefaultEffort: "Usa el predeterminat del model",
+      modelNotListed: "no és a OpenCode",
+      refresh: "Actualitza",
       save: "Desa",
       delete: "Elimina",
       description: "Descripció",
@@ -249,6 +274,7 @@
       unableCloseTerminal: "No s'ha pogut tancar la terminal.",
       unableSaveAgent: "No s'ha pogut desar l'agent.",
       unableRunAgent: "No s'ha pogut executar l'agent.",
+      unableStopAgent: "No s'ha pogut aturar l'agent.",
       error_auth_required: "Cal iniciar sessió.",
       error_setup_completed: "La configuració inicial ja s'ha completat.",
       error_invalid_username:
@@ -262,7 +288,8 @@
       error_path_not_directory: "La ruta no és un directori.",
       error_agent_not_found: "No s'ha trobat l'agent.",
       error_agent_prompt_required: "El prompt de l'agent és obligatori.",
-      error_agent_already_running: "L'agent ja s'està executant."
+      error_agent_already_running: "L'agent ja s'està executant.",
+      error_agent_not_running: "L'agent no s'està executant."
     }
   };
 
@@ -282,6 +309,7 @@
     sessions: [],
     agents: [],
     agentRuns: [],
+    models: [],
     activeId: null,
     activeAgentId: null,
     mode: "terminals",
@@ -385,10 +413,14 @@
     agentCwdInput: document.getElementById("agent-cwd-input"),
     browseAgentCwdButton: document.getElementById("browse-agent-cwd-button"),
     agentPromptInput: document.getElementById("agent-prompt-input"),
+    agentModelInput: document.getElementById("agent-model-input"),
+    agentVariantInput: document.getElementById("agent-variant-input"),
+    refreshModelsButton: document.getElementById("refresh-models-button"),
     agentEnabledInput: document.getElementById("agent-enabled-input"),
     agentTimeInput: document.getElementById("agent-time-input"),
     agentRuns: document.getElementById("agent-runs"),
     runAgentButton: document.getElementById("run-agent-button"),
+    stopAgentButton: document.getElementById("stop-agent-button"),
     saveAgentButton: document.getElementById("save-agent-button"),
     deleteAgentButton: document.getElementById("delete-agent-button")
   };
@@ -505,8 +537,10 @@
     els.agentList.classList.toggle("hidden", !isAgents);
     els.terminalWorkspace.classList.toggle("hidden", isAgents);
     els.agentsWorkspace.classList.toggle("hidden", !isAgents);
-    if (isAgents) loadAgents().catch((error) => alert(error.message));
-    else fitTerminal();
+    if (isAgents) {
+      loadAgents().catch((error) => alert(error.message));
+      loadModels();
+    } else fitTerminal();
   }
 
   function renderSessions() {
@@ -554,6 +588,63 @@
     renderAgents();
     if (!state.activeAgentId && state.agents.length) await selectAgent(state.agents[0].id);
     else renderAgentForm();
+  }
+
+  async function loadModels(refresh = false) {
+    try {
+      const data = await api(`/api/opencode/models${refresh ? "?refresh=1" : ""}`);
+      state.models = data.models || [];
+    } catch (error) {
+      state.models = [];
+    }
+    syncModelFields(currentAgent());
+  }
+
+  function setSelectValue(select, value) {
+    select.value = value || "";
+    if (select.value !== (value || "") && value) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = `${value} (${t("modelNotListed")})`;
+      select.append(option);
+      select.value = value;
+    }
+  }
+
+  function renderModelOptions() {
+    els.agentModelInput.replaceChildren();
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = t("useDefaultModel");
+    els.agentModelInput.append(defaultOption);
+    for (const model of state.models) {
+      const option = document.createElement("option");
+      option.value = model.id;
+      option.textContent = model.id;
+      els.agentModelInput.append(option);
+    }
+  }
+
+  function renderVariantOptions(modelId) {
+    const model = state.models.find((item) => item.id === modelId);
+    els.agentVariantInput.replaceChildren();
+    const defaultOption = document.createElement("option");
+    defaultOption.value = "";
+    defaultOption.textContent = t("useDefaultEffort");
+    els.agentVariantInput.append(defaultOption);
+    for (const value of model?.effortOptions || []) {
+      const option = document.createElement("option");
+      option.value = value;
+      option.textContent = value;
+      els.agentVariantInput.append(option);
+    }
+  }
+
+  function syncModelFields(agent) {
+    renderModelOptions();
+    setSelectValue(els.agentModelInput, agent?.model || "");
+    renderVariantOptions(els.agentModelInput.value);
+    setSelectValue(els.agentVariantInput, agent?.variant || "");
   }
 
   function renderAgents() {
@@ -616,8 +707,11 @@
 
   function renderAgentForm(agent = currentAgent()) {
     const hasAgent = Boolean(agent);
+    const isRunning = hasAgent && agent.status === "running";
     els.agentForm.classList.toggle("hidden", !hasAgent);
-    els.runAgentButton.disabled = !hasAgent || agent.id === "__new";
+    els.runAgentButton.disabled = !hasAgent || agent.id === "__new" || isRunning;
+    els.stopAgentButton.classList.toggle("hidden", !isRunning);
+    els.stopAgentButton.disabled = !isRunning;
     els.saveAgentButton.disabled = !hasAgent;
     els.deleteAgentButton.disabled = !hasAgent || agent.id === "__new";
 
@@ -638,6 +732,7 @@
     els.agentDescriptionInput.value = agent.description || "";
     els.agentCwdInput.value = agent.cwd || state.status?.defaults?.cwd || "";
     els.agentPromptInput.value = agent.prompt || "";
+    syncModelFields(agent);
     els.agentEnabledInput.checked = Boolean(agent.enabled);
     els.agentTimeInput.value = agent.schedule?.time || "09:00";
     const days = new Set((agent.schedule?.days || []).map(String));
@@ -660,6 +755,8 @@
       description: els.agentDescriptionInput.value,
       cwd: els.agentCwdInput.value,
       prompt: els.agentPromptInput.value,
+      model: els.agentModelInput.value,
+      variant: els.agentVariantInput.value,
       enabled: els.agentEnabledInput.checked,
       schedule: {
         time: els.agentTimeInput.value || "09:00",
@@ -1063,6 +1160,24 @@
     } catch (error) {
       alert(error.message || t("unableRunAgent"));
     }
+  });
+
+  els.stopAgentButton.addEventListener("click", async () => {
+    const agent = currentAgent();
+    if (!agent) return;
+    try {
+      await api(`/api/agents/${encodeURIComponent(agent.id)}/stop`, { method: "POST" });
+      await loadAgents();
+      await selectAgent(agent.id);
+    } catch (error) {
+      alert(error.message || t("unableStopAgent"));
+    }
+  });
+
+  els.refreshModelsButton.addEventListener("click", () => loadModels(true));
+
+  els.agentModelInput.addEventListener("change", () => {
+    renderVariantOptions(els.agentModelInput.value);
   });
 
   els.deleteAgentButton.addEventListener("click", async () => {

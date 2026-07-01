@@ -2,6 +2,7 @@ const { EventEmitter } = require("events");
 const { spawn } = require("child_process");
 const crypto = require("crypto");
 const path = require("path");
+const { resolveSpawnTarget, killTree } = require("./shell-quote");
 
 function splitArgs(input) {
   if (!input) return [];
@@ -56,6 +57,8 @@ function isInside(parent, candidate) {
   return relative === "" || (!relative.startsWith("..") && !path.isAbsolute(relative));
 }
 
+const DEFAULT_TIMEOUT_MS = 20 * 60 * 1000;
+
 class AgentManager extends EventEmitter {
   constructor({ store, defaultCwd, workspaceRoot }) {
     super();
@@ -63,11 +66,31 @@ class AgentManager extends EventEmitter {
     this.defaultCwd = path.resolve(defaultCwd || process.cwd());
     this.workspaceRoot = workspaceRoot ? path.resolve(workspaceRoot) : null;
     this.running = new Set();
+    this.processes = new Map();
     this.timer = null;
+    this.timeoutMs = Number(process.env.OPENFORGE_AGENT_TIMEOUT_MS) || DEFAULT_TIMEOUT_MS;
+  }
+
+  async reconcileOrphanedRuns() {
+    const orphaned = this.store.getAgentRuns(null, Infinity).filter((run) => run.status === "running");
+    for (const run of orphaned) {
+      const finishedAt = new Date().toISOString();
+      await this.store.updateAgentRun(run.id, {
+        status: "failed",
+        finishedAt,
+        error: "Interrupted by server restart."
+      });
+      const agent = this.store.getAgent(run.agentId);
+      if (agent && agent.lastRunId === run.id) {
+        await this.store.updateAgent(run.agentId, { status: "failed" });
+      }
+    }
+    if (orphaned.length) this.emit("agents:changed", this.store.getAgents());
   }
 
   start() {
     if (this.timer) return;
+    this.reconcileOrphanedRuns().catch((error) => console.error("Agent reconciliation failed:", error));
     this.timer = setInterval(() => {
       this.tick().catch((error) => console.error("Agent scheduler failed:", error));
     }, 30_000);
@@ -103,6 +126,8 @@ class AgentManager extends EventEmitter {
       description: String(input.description || "").trim().slice(0, 400),
       cwd: this.resolveCwd(input.cwd || existing.cwd || this.defaultCwd),
       prompt: String(input.prompt || "").trim(),
+      model: String(input.model ?? existing.model ?? "").trim().slice(0, 200),
+      variant: String(input.variant ?? existing.variant ?? "").trim().slice(0, 100),
       enabled,
       schedule,
       status: existing.status || "idle",
@@ -167,15 +192,32 @@ class AgentManager extends EventEmitter {
     if (envArgs.length) {
       const hasPromptPlaceholder = envArgs.some((arg) => arg.includes("{prompt}"));
       const args = envArgs.map((arg) =>
-        arg.replaceAll("{prompt}", agent.prompt).replaceAll("{cwd}", agent.cwd)
+        arg
+          .replaceAll("{prompt}", agent.prompt)
+          .replaceAll("{cwd}", agent.cwd)
+          .replaceAll("{model}", agent.model || "")
+          .replaceAll("{variant}", agent.variant || "")
       );
       if (!hasPromptPlaceholder) args.push(agent.prompt);
       return { command, args };
     }
-    return {
-      command,
-      args: ["run", "--auto", "--dir", agent.cwd, agent.prompt]
-    };
+    const args = ["run", "--auto", "--dir", agent.cwd];
+    if (agent.model) args.push("--model", agent.model);
+    if (agent.variant) args.push("--variant", agent.variant);
+    args.push(agent.prompt);
+    return { command, args };
+  }
+
+  stopAgent(agentId) {
+    const processState = this.processes.get(agentId);
+    if (!processState) {
+      const error = new Error("Agent is not running.");
+      error.code = "agent_not_running";
+      throw error;
+    }
+    processState.stopRequested = true;
+    killTree(processState.child);
+    return true;
   }
 
   async runAgent(agentId, trigger = "manual") {
@@ -233,12 +275,23 @@ class AgentManager extends EventEmitter {
     this.running.add(agentId);
     const started = Date.now();
 
+    let timedOut = false;
+    const target = resolveSpawnTarget(command.command, command.args);
+
     await new Promise((resolve) => {
-      const child = spawn(command.command, command.args, {
+      const child = spawn(target.file, target.args, {
         cwd: agent.cwd,
         env: process.env,
         windowsHide: true
       });
+      const processState = { child, stopRequested: false };
+      this.processes.set(agentId, processState);
+
+      const timeoutTimer = setTimeout(() => {
+        timedOut = true;
+        killTree(child);
+      }, this.timeoutMs);
+      timeoutTimer.unref();
 
       child.stdout.on("data", async (chunk) => {
         run.stdout = appendBounded(run.stdout, chunk);
@@ -253,19 +306,24 @@ class AgentManager extends EventEmitter {
       });
 
       child.on("error", (error) => {
+        clearTimeout(timeoutTimer);
         run.error = error.message;
         run.status = "failed";
         resolve();
       });
 
       child.on("close", (code, signal) => {
+        clearTimeout(timeoutTimer);
         run.exitCode = code;
         run.signal = signal;
         run.status = code === 0 ? "success" : "failed";
+        if (timedOut) run.error = `Timed out after ${this.timeoutMs}ms.`;
+        else if (processState.stopRequested) run.error = "Stopped by user.";
         resolve();
       });
     });
 
+    this.processes.delete(agentId);
     this.running.delete(agentId);
     run.finishedAt = new Date().toISOString();
     run.durationMs = Date.now() - started;
